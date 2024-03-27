@@ -1,0 +1,344 @@
+<!DOCTYPE HTML>
+<!--
+	Hyperspace by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+
+<head>
+    <title>MERT YILMAZ - Game Development & Design Portfolio</title>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"/>
+    <link rel="stylesheet" href="assets/css/main.css"/>
+    <noscript>
+        <link rel="stylesheet" href="assets/css/noscript.css"/>
+    </noscript>
+</head>
+
+<body class="is-preload">
+
+<!-- Header -->
+<header id="header">
+    <a href="index.html" class="title">MERT YILMAZ</a>
+    <nav>
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="generic.html" class="active">Generic</a></li>
+            <li><a href="elements.html">Elements</a></li>
+        </ul>
+    </nav>
+</header>
+
+<!-- Wrapper -->
+<div id="wrapper">
+
+    <!-- Main -->
+    <section id="main" class="wrapper">
+        <div class="inner">
+            <h1 class="major">Dungeon Escape</h1>
+            <span class="image fit"><img src="images/DungeonEscapeGameplay.png" alt=""/></span>
+            <p>Dungeon Escape is a narration based adventure game developed for a 48-hour game jam using Unity. I have
+                synchronized the narration with the player's actions.</p>
+
+            <h2>Code Snippets</h2>
+            <h3>Narrator Manager</h3>
+            <pre><code>public class NarratorManager : MonoBehaviour
+{
+    public static NarratorManager Instance { get; private set; }
+    [SerializeField] private AudioSource audioSource;
+
+    [Header("First Level")] [SerializeField]
+    private GameObject deadDwarf;
+
+    [SerializeField] private GameObject dwarfBracelet;
+    [SerializeField] private GameObject lockedDoor;
+    [Header("Second Level")] public bool HasDiedOnTheSecondLevel = false;
+    [SerializeField] private PlayerMovement playerMovement;
+
+    [Header("Third Level")] [SerializeField]
+    private float thirdLevelSecondsUntilTimeStop;
+
+    [SerializeField] private Rigidbody rb;
+
+    [SerializeField] private GameObject correctLever;
+
+    //[SerializeField] private bool correctLeverPulled;
+    [SerializeField] private GameObject thirdLevelTeleporter;
+
+    [Header("Fourth Level")] [SerializeField]
+    private GameObject lavaToDisable;
+
+    [SerializeField] private GameObject grapplingHookUI;
+    [SerializeField] private GameObject theEndText;
+
+    private Coroutine currentRoutine = null;
+    [SerializeField] private SerializedDictionary&ltAudioType, AudioClip&gt clipsDic;
+
+    private void Awake()
+    {
+        if (Instance != null && Instance != this)
+            Destroy(this);
+
+        else
+            Instance = this;
+    }
+
+    private void Start()
+    {
+        Teleporter.OnTeleported += NarrateLevels;
+        deadDwarf.GetComponent&ltDeadBody&gt().OnBraceletPickedUp += StartNarratingFirstLevelPartTwo;
+        lockedDoor.GetComponent&ltCageDoor&gt().OnDoorOpened += StartNarratingFirstLevelPartThree;
+        currentRoutine = StartCoroutine(NarrateFirstLevelNoBracelet());
+        playerMovement.canWallRun = false;
+    }
+
+    private IEnumerator NarrateFirstLevelNoBracelet()
+    {
+        audioSource.clip = clipsDic[AudioType.Intro];
+        audioSource.Play();
+        yield return new WaitWhile(() => audioSource.isPlaying);
+        deadDwarf.layer = LayerMask.NameToLayer("Interactable");
+    }
+
+    private void StartNarratingFirstLevelPartTwo(object sender, EventArgs e)
+    {
+        StartCoroutine(NarrateFirstLevelGotBracelet());
+    }
+
+    private void StartNarratingFirstLevelPartThree(object sender, EventArgs e)
+    {
+        StartCoroutine(NarrateFirstLevelDoorOpened());
+    }
+
+    private IEnumerator NarrateFirstLevelGotBracelet()
+    {
+        audioSource.clip = clipsDic[AudioType.Intro2];
+        audioSource.Play();
+        yield return new WaitWhile(() => audioSource.isPlaying);
+        lockedDoor.layer = LayerMask.NameToLayer("Interactable");
+    }
+
+    private IEnumerator NarrateFirstLevelDoorOpened() // Edge case: Player speedruns to level 2
+    {
+        audioSource.clip = clipsDic[AudioType.Parkour];
+        audioSource.Play();
+        yield return new WaitWhile(() => audioSource.isPlaying);
+    }
+
+    private void NarrateLevels(object sender, TeleportEventArgs e)
+    {
+        switch (e.NewLevel)
+        {
+            case 1:
+                StartCoroutine(NarrateSecondLevel());
+                break;
+            case 2:
+                StartCoroutine(NarrateThirdLevel());
+                break;
+            case 3:
+                lavaToDisable.SetActive(false);
+                break;
+        }
+    }
+
+    private IEnumerator NarrateSecondLevel()
+    {
+        // Disable wall jump!
+        audioSource.clip = clipsDic[AudioType.Parkour2];
+        audioSource.Play();
+        SubtitleManager.OnSubtitle?.Invoke();
+        yield return new WaitWhile(() => audioSource.isPlaying);
+
+        while (true)
+        {
+            if (HasDiedOnTheSecondLevel)
+            {
+                yield return NarrateSecondLevelFirstDeath();
+                yield break;
+            }
+
+            yield return null;
+        }
+    }
+
+    private IEnumerator NarrateSecondLevelFirstDeath()
+    {
+        audioSource.clip = clipsDic[AudioType.Parkour2Second];
+        audioSource.Play();
+        SubtitleManager.OnSubtitle?.Invoke();
+        playerMovement.canWallRun = true;
+        yield return new WaitWhile(() => audioSource.isPlaying);
+        audioSource.clip = clipsDic[AudioType.MomAreYouStillPlaying];
+        audioSource.Play();
+        SubtitleManager.OnSubtitle?.Invoke();
+        yield return new WaitWhile(() => audioSource.isPlaying);
+        audioSource.clip = clipsDic[AudioType.Parkour2Third];
+        audioSource.Play();
+        SubtitleManager.OnSubtitle?.Invoke();
+    }
+
+
+    private IEnumerator NarrateThirdLevel()
+    {
+        audioSource.clip = clipsDic[AudioType.Puzzle];
+        audioSource.Play();
+        SubtitleManager.OnSubtitle?.Invoke();
+        yield return new WaitWhile(() => audioSource.isPlaying);
+        //yield return new WaitForSeconds(thirdLevelSecondsUntilTimeStop);
+    }
+
+    public void DoNarrateThirdLevelDeath()
+    {
+        StartCoroutine(NarrateThirdLevelDeath());
+    }
+
+    private IEnumerator NarrateThirdLevelDeath()
+    {
+        audioSource.Stop();
+        //subtitle stoplayacagız.
+
+        rb.constraints = RigidbodyConstraints.FreezeAll;
+        Time.timeScale = 0f;
+        // ---------------------------------------Freeze player HERE!---------------------------------------
+        audioSource.clip = clipsDic[AudioType.PuzzleSecond];
+        audioSource.Play();
+        SubtitleManager.OnSubtitle?.Invoke();
+        yield return new WaitWhile(() => audioSource.isPlaying);
+        correctLever.SetActive(true);
+        Time.timeScale = 1f;
+        rb.constraints = RigidbodyConstraints.FreezeRotation;
+        Destroy(lavaToDisable.GetComponent&ltAnimator&gt());
+        lavaToDisable.transform.localScale = new Vector3(0.2f, 1.5f, 0.2f);
+        // Make lava smaller
+    }
+
+    public void DoNarrateCorrectLevelPulledThirdLevel()
+    {
+        Debug.Log("Lever pulled!");
+        StartCoroutine(NarrateCorrectLevelPulledThirdLevel());
+    }
+
+    private IEnumerator NarrateCorrectLevelPulledThirdLevel()
+    {
+        Debug.Log("BRUH");
+        thirdLevelTeleporter.SetActive(true);
+        yield return new WaitForSeconds(0.75f);
+        yield return NarrateFourthLevel();
+        thirdLevelTeleporter.SetActive(false);
+    }
+
+    private IEnumerator NarrateFourthLevel()
+    {
+        audioSource.clip = clipsDic[AudioType.Parkour3AfterLevelFinish];
+        audioSource.Play();
+        SubtitleManager.OnSubtitle?.Invoke();
+        yield return new WaitForSeconds(25f);
+        grapplingHookUI.SetActive(true);
+        yield return new WaitUntil(() => Input.GetKeyDown(KeyCode.C));
+        grapplingHookUI.SetActive(false);
+        //yield return new WaitWhile(() => audioSource.isPlaying);
+    }
+
+    public void DoNarrateCoinsCollectedFirstTimeFourthLevel()
+    {
+        StartCoroutine(NarrateCoinsCollectedFirstTimeFourthLevel());
+    }
+
+    public void DoNarrateCoinsCollectedNotFirstTimeFourthLevel()
+    {
+        StartCoroutine(NarrateCoinsCollectedNotFirstTimeFourthLevel());
+    }
+
+    public void DoNarrateCoinsNotCollectedFourthLevel()
+    {
+        StartCoroutine(NarrateCoinsNotCollectedFourthLevel());
+    }
+
+    private IEnumerator NarrateCoinsCollectedFirstTimeFourthLevel()
+    {
+        audioSource.clip = clipsDic[AudioType.EndCoinsCollectedFirstTime];
+        audioSource.Play();
+
+        yield return new WaitWhile(() => audioSource.isPlaying);
+        yield return NarrateMomTalkFourthLevel();
+    }
+
+    private IEnumerator NarrateCoinsCollectedNotFirstTimeFourthLevel()
+    {
+
+        audioSource.clip = clipsDic[AudioType.EndCoinsCollectedNotFirstTime];
+        audioSource.Play();
+
+        yield return new WaitWhile(() => audioSource.isPlaying);
+        yield return NarrateMomTalkFourthLevel();
+    }
+
+    private IEnumerator NarrateCoinsNotCollectedFourthLevel()
+    {
+        audioSource.clip = clipsDic[AudioType.EndCoinsNotCollectedAtAll];
+        audioSource.Play();
+
+        yield return new WaitWhile(() => audioSource.isPlaying);
+    }
+
+    private IEnumerator NarrateMomTalkFourthLevel()
+    {
+        audioSource.clip = clipsDic[AudioType.MomGoToSleep];
+        audioSource.Play();
+
+        yield return new WaitWhile(() => audioSource.isPlaying);
+        audioSource.clip = clipsDic[AudioType.OkayMom];
+        audioSource.Play();
+
+        yield return new WaitWhile(() => audioSource.isPlaying);
+        theEndText.SetActive(true);
+    }
+}
+
+public enum AudioType
+{
+    Intro,
+    Intro2,
+    Parkour,
+    Parkour2,
+    Parkour2Second,
+    Parkour2Third,
+    Parkour3AfterLevelFinish,
+    Puzzle,
+    PuzzleSecond,
+    EndCoinsCollectedFirstTime,
+    EndCoinsCollectedNotFirstTime,
+    EndCoinsNotCollectedAtAll,
+    MomAreYouStillPlaying,
+    MomGoToSleep,
+    OkayMom
+}</code></pre>
+
+        </div>
+    </section>
+
+</div>
+
+<!-- Footer -->
+<footer id="footer" class="wrapper alt">
+    <div class="inner">
+        <ul class="menu">
+            <li>&copy; Untitled. All rights reserved.</li>
+            <li>Design: <a href="http://html5up.net">HTML5 UP</a></li>
+        </ul>
+    </div>
+</footer>
+
+<!-- Scripts -->
+<script src="assets/js/jquery.min.js"></script>
+<script src="assets/js/jquery.scrollex.min.js"></script>
+<script src="assets/js/jquery.scrolly.min.js"></script>
+<script src="assets/js/browser.min.js"></script>
+<script src="assets/js/breakpoints.min.js"></script>
+<script src="assets/js/util.js"></script>
+<script src="assets/js/main.js"></script>
+
+</body>
+
+</html>

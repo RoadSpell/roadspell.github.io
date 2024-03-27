@@ -1,0 +1,366 @@
+<!DOCTYPE HTML>
+<!--
+	Hyperspace by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html lang="en-US">
+
+<head>
+    <title>MERT YILMAZ - Game Development & Design Portfolio</title>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"/>
+    <link rel="stylesheet" href="assets/css/main.css"/>
+    <noscript>
+        <link rel="stylesheet" href="assets/css/noscript.css"/>
+    </noscript>
+</head>
+
+<body class="is-preload">
+
+<!-- Header -->
+<header id="header">
+    <a href="index.html" class="title">MERT YILMAZ</a>
+    <nav>
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="generic.html" class="active">Generic</a></li>
+            <li><a href="elements.html">Elements</a></li>
+        </ul>
+    </nav>
+</header>
+
+<!-- Wrapper -->
+<div id="wrapper">
+
+    <!-- Main -->
+    <section id="main" class="wrapper">
+        <div class="inner">
+            <h1 class="major">Hazard Survivor</h1>
+            <span class="image fit"><img src="images/pic04.jpg" alt=""/></span>
+            <p>In the development of Hazard Survivor, my contributions include the implementation of diverse
+                obstacles, enemies, and their behaviors. Additionally, I engineered a road generation system,
+                incorporating both random and weighted random elements to ensure dynamic and engaging level layouts
+                to give a basis to work on for level design.</p>
+            <h2>Code Snippets</h2>
+            <h3>Player</h3>
+            <pre><code>public class Player : Character
+{
+    public delegate void OnPlayerDead();
+
+    public static OnPlayerDead playerDied;
+    public FloatingJoystick _joystick;
+    public GameObject _deadScene;
+    public GameObject _gamehud;
+    public AudioSource _themeSong;
+    [SerializeField] private CinemachineVirtualCamera cmVcam;
+    public bool isBeingKilled = false;
+    [SerializeField] internal BoxManager _boxManager;
+
+
+    private void Awake()
+    {
+        characterRigidbody = GetComponent&ltRigidbody&gt();
+    }
+
+    private void Start()
+    {
+        CanMove = true;
+    }
+
+    private void OnEnable()
+    {
+        playerDied += characterDeath.SlowTime;
+        playerDied += StopCamera;
+    }
+
+    private void OnDisable()
+    {
+        playerDied -= characterDeath.SlowTime;
+        playerDied -= StopCamera;
+    }
+
+    private void StopCamera()
+    {
+        cmVcam.Follow = null;
+        cmVcam.LookAt = null;
+    }
+
+    public void GetKilled(Transform hostileTransform, float localXOffset, float localZOffset, Action playerAnimation)
+    {
+        GetComponent&ltCharacter&gt().CanMove = false;
+        this.transform.parent = hostileTransform;
+        transform.localRotation = Quaternion.identity;
+        Vector3 newPosition = new Vector3(transform.localPosition.x + localXOffset, transform.localPosition.y, transform.localPosition.z + localZOffset);
+        transform.localPosition = newPosition;
+        playerAnimation();
+    }
+}
+				</code></pre>
+
+            <h3>Turret Behaviour</h3>
+            <pre><code>public class TurretBehaviour : MonoBehaviour, IDamageDealer
+{
+    [SerializeField] private float shootingDuration;
+    [SerializeField] AudioSource audioData;
+    [SerializeField] private AudioClip shootingSfx;
+    [SerializeField] private AudioClip laserSfx;
+    [SerializeField] private AudioClip overheatSfx;
+    [SerializeField] ParticleSystem bulletParticleEffect;
+    [SerializeField] Collider shootingCollider;
+    [SerializeField] private float horizontalForceRadius;
+    [SerializeField] private LineRenderer lineRenderer;
+    [SerializeField] private float laserKickStartAmount;
+
+    private bool _readyToShoot;
+    private Renderer _renderer;
+
+    void Start()
+    {
+        StartCoroutine(Fire());
+    }
+
+    void OnEnable()
+    {
+        lineRenderer = GetComponent&ltLineRenderer&gt();
+        _renderer = GetComponent&ltRenderer&gt();
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        DealDamage(other.gameObject);
+    }
+
+    public void DealDamage(GameObject other)
+    {
+        other.GetComponent&ltDeath&gt()?.Die(other.TryGetComponent(out Player temp), DeathCause.Turret,
+            horizontalForceRadius, null);
+    }
+
+    private IEnumerator Fire()      // OverheatSFX - green, LaserSFX - yellow, Shooting - red
+    {
+        while (_renderer.enabled)
+        {
+            SetShooting(true);
+            SetLaserColor(Color.red);
+
+            yield return new WaitForSeconds(shootingDuration);
+
+            SetShooting(false);
+            SetLaserColor(Color.clear);
+            yield return new WaitForSeconds(overheatSfx.length);
+
+            SetLaserColor(new Color(255,215,0));    // Gold
+            KickStartLaser();
+
+            audioData.clip = laserSfx;
+            if (!audioData.isPlaying)
+                audioData.PlayDelayed(0.3f);
+
+            StartCoroutine(FadeInLaser());
+
+            yield return new WaitUntil(() => _readyToShoot);
+        }
+    }
+
+    void SetShooting(bool shootingState) //Plays overheat sfx if set to false!
+    {
+        if (shootingState)
+        {
+            shootingCollider.enabled = true;
+            audioData.clip = shootingSfx;
+
+            if (!audioData.isPlaying)
+                audioData.Play();
+
+            bulletParticleEffect.Play();
+        }
+        else
+        {
+            bulletParticleEffect.Stop();
+            shootingCollider.enabled = false;
+            _readyToShoot = false;
+
+            if (audioData.isPlaying)
+                audioData.Stop();
+
+            audioData.clip = overheatSfx;
+            if (!audioData.isPlaying)
+                audioData.Play();
+        }
+    }
+
+    void KickStartLaser()
+    {
+        var currentMaterialStartColor =
+            lineRenderer
+                .startColor;
+        var currentMaterialEndColor = lineRenderer.endColor;
+
+        currentMaterialStartColor.a = laserKickStartAmount;
+        currentMaterialEndColor.a = laserKickStartAmount;
+
+        lineRenderer.startColor = currentMaterialStartColor;
+        lineRenderer.endColor = currentMaterialEndColor;
+    }
+
+    private IEnumerator FadeInLaser()
+    {
+        while (lineRenderer.startColor.a < 1f)
+        {
+            var currentMaterialStartColor =
+                lineRenderer
+                    .startColor;
+            var currentMaterialEndColor = lineRenderer.endColor;
+
+            currentMaterialStartColor.a += 0.01f;
+            currentMaterialStartColor.a += 0.01f;
+
+            lineRenderer.startColor = currentMaterialStartColor;
+            lineRenderer.endColor = currentMaterialEndColor;
+
+            yield return new WaitForSeconds(0.04f);
+        }
+
+        _readyToShoot = true;
+    }
+
+    void SetLaserColor(Color newColor)
+    {
+        Gradient tempGradient = new Gradient();
+
+        GradientColorKey[] tempColorKeys = new GradientColorKey[2];
+        tempColorKeys[0] = new GradientColorKey(newColor, 0);
+        tempColorKeys[1] = new GradientColorKey(newColor, 1);
+
+        tempGradient.colorKeys = tempColorKeys;
+        lineRenderer.colorGradient = tempGradient;
+    }
+}</code></pre>
+
+            <h3>Ragdoll Manager</h3>
+            <pre><code>public class RagdollManager : MonoBehaviour
+{
+    public BoxCollider mainCollider;
+    public GameObject mainRig;
+
+    public Animator mainAnimator;
+
+    private Character character;
+    Rigidbody[] limbsRigidbodies;
+    Collider[] ragDollColliders;
+
+
+    private void Awake()
+    {
+        character = GetComponent&ltCharacter&gt();
+    }
+
+
+    void Start()
+    {
+        GetRagdollBits();
+        RagdollModeOff();
+
+        GetComponent&ltRigidbody&gt().centerOfMass = Vector3.zero;
+        GetComponent&ltRigidbody&gt().inertiaTensorRotation = Quaternion.identity;
+    }
+
+    void GetRagdollBits()
+    {
+        ragDollColliders = mainRig.GetComponentsInChildren&ltCollider&gt();
+        limbsRigidbodies = mainRig.GetComponentsInChildren&ltRigidbody&gt();
+    }
+
+    public void RagdollModeOn(DeathCause causeOfDeath, float? horizontalForceRadius, float? verticalForceAmount)
+    {
+        character.CanMove = false;
+
+        if (mainAnimator != null)
+            mainAnimator.enabled = false;
+
+        Destroy(gameObject, 3f);
+        foreach (Collider col in ragDollColliders)
+        {
+            col.enabled = true;
+        }
+
+        if (causeOfDeath == DeathCause.Regular)
+        {
+            foreach (Rigidbody rigid in limbsRigidbodies)
+            {
+                rigid.isKinematic = false;
+            }
+        }
+
+        else if (causeOfDeath == DeathCause.Explosion)
+        {
+            foreach (Rigidbody rigid in limbsRigidbodies)
+            {
+                rigid.isKinematic = false;
+                rigid.AddForce((Vector3)(transform.right *
+                                         Random.Range((float)-horizontalForceRadius, (float)horizontalForceRadius) +
+                                         transform.up * verticalForceAmount +
+                                         transform.forward * Random.Range((float)-horizontalForceRadius,
+                                             (float)horizontalForceRadius)),
+                    ForceMode.Impulse);
+            }
+        }
+        else if (causeOfDeath == DeathCause.Turret)
+        {
+            foreach (Rigidbody rigid in limbsRigidbodies)
+            {
+                rigid.isKinematic = false;
+                rigid.AddForce(new Vector3(transform.position.x * (float)horizontalForceRadius, 0f, 0f),
+                    ForceMode.Impulse);
+            }
+        }
+
+        mainCollider.enabled = false;
+        GetComponent&ltRigidbody&gt().isKinematic = true;
+    }
+
+    public void RagdollModeOff()
+    {
+        foreach (Collider col in ragDollColliders)
+        {
+            col.enabled = false;
+        }
+
+        foreach (Rigidbody rigid in limbsRigidbodies)
+        {
+            rigid.isKinematic = true;
+        }
+
+        mainAnimator.enabled = true;
+        mainCollider.enabled = true;
+        GetComponent&ltRigidbody&gt().isKinematic = false;
+    }
+}</code></pre>
+        </div>
+    </section>
+
+</div>
+
+<!-- Footer -->
+<footer id="footer" class="wrapper alt">
+    <div class="inner">
+        <ul class="menu">
+            <li>&copy; Untitled. All rights reserved.</li>
+            <li>Design: <a href="http://html5up.net">HTML5 UP</a></li>
+        </ul>
+    </div>
+</footer>
+
+<!-- Scripts -->
+<script src="assets/js/jquery.min.js"></script>
+<script src="assets/js/jquery.scrollex.min.js"></script>
+<script src="assets/js/jquery.scrolly.min.js"></script>
+<script src="assets/js/browser.min.js"></script>
+<script src="assets/js/breakpoints.min.js"></script>
+<script src="assets/js/util.js"></script>
+<script src="assets/js/main.js"></script>
+
+</body>
+
+</html>

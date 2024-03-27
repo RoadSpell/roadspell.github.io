@@ -1,0 +1,233 @@
+<!DOCTYPE HTML>
+<!--
+	Hyperspace by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+
+<head>
+	<title>MERT YILMAZ - Game Development & Design Portfolio</title>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+	<link rel="stylesheet" href="assets/css/main.css" />
+	<noscript>
+		<link rel="stylesheet" href="assets/css/noscript.css" />
+	</noscript>
+</head>
+
+<body class="is-preload">
+
+	<!-- Header -->
+	<header id="header">
+		<a href="index.html" class="title">MERT YILMAZ</a>
+		<nav>
+			<ul>
+				<li><a href="index.html">Home</a></li>
+				<li><a href="generic.html" class="active">Generic</a></li>
+				<li><a href="elements.html">Elements</a></li>
+			</ul>
+		</nav>
+	</header>
+
+	<!-- Wrapper -->
+	<div id="wrapper">
+
+		<!-- Main -->
+		<section id="main" class="wrapper">
+			<div class="inner">
+				<h1 class="major">Symbi-Node</h1>
+				<span class="image fit"><img src="images/SymbiNodeGameplay.png" alt="" /></span>
+				<p>SymbiNode, a survivor-like game developed within a 72-hour game jam using Unity. In this project, I
+					implemented an enemy spawn
+					and stage progression system using scriptable objects to efficiently store crucial data. This
+					approach provided flexibility for quick adjustments during the time-constrained game jam.</p>
+
+                <h2>Code Snippets</h2>
+                <h3>Object Pooler</h3>
+				<pre><code>public class ObjectPooler : MonoBehaviour
+{
+    public List&ltPool&gt PoolList = new List&ltPool&gt();
+    public ObjectPooler Instance { get; private set; }
+
+    private void Awake()
+    {
+        if (Instance != null)
+        {
+            Destroy(this.gameObject);
+        }
+        else
+        {
+            Instance = this;
+        }
+    }
+
+    private void Start()
+    {
+        foreach (var pool in PoolList)
+        {
+            for (int i = 0; i < pool.PoolStartSize; i++)
+            {
+                GameObject newObject = Instantiate(pool.Prefab) as GameObject;
+                pool.ObjectPool.Enqueue(newObject);
+                newObject.SetActive(false);
+            }
+        }
+    }
+
+    public GameObject GetObject(string poolTag)
+    {
+        var desiredPool = PoolList.Find(p => p.Tag == poolTag);
+
+        if (desiredPool.ObjectPool.Count > 0)
+        {
+            GameObject newObject = desiredPool.ObjectPool.Dequeue();
+            newObject.SetActive(true);
+            return newObject;
+        }
+        else
+        {
+            GameObject newObject = Instantiate(desiredPool.Prefab) as GameObject;
+            return newObject;
+        }
+    }
+
+    public GameObject GetObject(GameObject targetPrefab)
+    {
+        var desiredPool = PoolList.Find(p => p.Tag == targetPrefab.GetComponent&ltEnemy&gt().valuesSO.tag);
+        Debug.Log("Desired pool is " + desiredPool.Tag);
+
+        if (desiredPool.ObjectPool.Count > 0)
+        {
+            GameObject newObject = desiredPool.ObjectPool.Dequeue();
+            newObject.SetActive(true);
+            return newObject;
+        }
+        else
+        {
+            GameObject newObject = Instantiate(desiredPool.Prefab) as GameObject;
+            return newObject;
+        }
+    }
+
+    public void ReturnObject(string poolTag, GameObject objectToReturn)
+    {
+        var desiredPool = PoolList.Find(p => p.Tag == poolTag);
+
+        desiredPool.ObjectPool.Enqueue(objectToReturn);
+        objectToReturn.SetActive(false);
+    }
+
+    [Serializable]
+    public class Pool
+    {
+        public string Tag;
+        public GameObject Prefab;
+        public int PoolStartSize = 5;
+        public Queue&ltGameObject&gt ObjectPool = new Queue&ltGameObject&gt();
+    }
+}</code></pre>
+<h3>Spawner</h3>
+				<pre><code>public class SpawnerAdvanced : MonoBehaviour
+{
+    [SerializeField] private List&ltStageSO&gt allStages = new List&ltStageSO&gt();
+    [SerializeField] private GameObject bossPrefab;
+    [SerializeField] private float bossSpawnTime;
+    public List&ltTransform&gt spawnPlaces;
+    private bool _bossSpawned = false;
+    private StageSO _currentStage;
+
+    private ObjectPooler _objectPool;
+    private int _stageIndex = 0;
+    public Queue&ltGameObject&gt EnemyQueue = new Queue&ltGameObject&gt();
+
+
+    private void Start()
+    {
+        _objectPool = FindObjectOfType&ltObjectPooler&gt();
+        _currentStage = allStages[_stageIndex];
+        SetEnemyQueue();
+
+        Invoke(nameof(SpawnBoss), bossSpawnTime);
+    }
+
+    private void FixedUpdate()
+    {
+        SpawnNonBossEnemies();
+    }
+
+    private void SetEnemyQueue()
+    {
+        foreach (var enemy in _currentStage.enemies)
+        {
+            EnemyQueue.Enqueue(enemy);
+        }
+    }
+
+    private void SpawnNonBossEnemies()
+    {
+        if (!_bossSpawned)
+        {
+            _currentStage.timeSinceSpawn += Time.deltaTime;
+
+            if (_currentStage.timeSinceSpawn >= _currentStage.timeTakesToSpawn)
+            {
+                if (EnemyQueue.Count <= 0)
+                {
+                    if (_stageIndex + 1 != allStages.Count)
+                    {
+                        _stageIndex++;
+                        _currentStage = allStages[_stageIndex];
+                        SetEnemyQueue();
+                    }
+                    else
+                    {
+                        Debug.Log("Stage finished, stage was " + _currentStage);
+                        //this.gameObject.SetActive(false);
+                    }
+                }
+                else
+                {
+                    Debug.Log(EnemyQueue.Peek());
+                    GameObject newObject = _objectPool.GetObject(EnemyQueue.Dequeue());
+                    newObject.transform.position = spawnPlaces[Random.Range(0, spawnPlaces.Count)].position;
+                    newObject.SetActive(true);
+                    _currentStage.timeSinceSpawn = 0f;
+                }
+            }
+        }
+    }
+
+    private void SpawnBoss()
+    {
+        Instantiate(bossPrefab, spawnPlaces[Random.Range(0, spawnPlaces.Count)]);
+        _bossSpawned = true;
+    }
+}</code></pre>
+			</div>
+		</section>
+
+	</div>
+
+	<!-- Footer -->
+	<footer id="footer" class="wrapper alt">
+		<div class="inner">
+			<ul class="menu">
+				<li>&copy; Untitled. All rights reserved.</li>
+				<li>Design: <a href="http://html5up.net">HTML5 UP</a></li>
+			</ul>
+		</div>
+	</footer>
+
+	<!-- Scripts -->
+	<script src="assets/js/jquery.min.js"></script>
+	<script src="assets/js/jquery.scrollex.min.js"></script>
+	<script src="assets/js/jquery.scrolly.min.js"></script>
+	<script src="assets/js/browser.min.js"></script>
+	<script src="assets/js/breakpoints.min.js"></script>
+	<script src="assets/js/util.js"></script>
+	<script src="assets/js/main.js"></script>
+
+</body>
+
+</html>
