@@ -18,63 +18,406 @@
 
 <body class="is-preload">
 
-	<!-- Header -->
-	<header id="header">
-		<a href="index.html" class="title">MERT YILMAZ</a>
-		<nav>
-			<ul>
-				<li><a href="index.html">Home</a></li>
-				<li><a href="generic.html" class="active">Generic</a></li>
-				<li><a href="elements.html">Elements</a></li>
-			</ul>
-		</nav>
-	</header>
+<!-- Header -->
+<header id="header">
+	<a href="index.html" class="title">MERT YILMAZ</a>
+	<nav>
+		<ul>
+			<li><a href="index.html">Home</a></li>
+			<li><a href="generic.html" class="active">Generic</a></li>
+			<li><a href="elements.html">Elements</a></li>
+		</ul>
+	</nav>
+</header>
 
-	<!-- Wrapper -->
-	<div id="wrapper">
+<!-- Wrapper -->
+<div id="wrapper">
 
-		<!-- Main -->
-		<section id="main" class="wrapper">
-			<div class="inner">
-				<h1 class="major">Astroon Idle</h1>
-				<span class="image fit"><img src="images/AstroonConcept.jpg" alt="" /></span>
-				<p>Astroon Idle, an idle manager mobile game, offers players a dynamic experience with:
-
-				<ul>
-					<li>Unlocking and upgrading buildings for specific purposes</li>
-					<li>Merging hexagon mines to gather basic resources</li>
-					<li>Refining resources to create ship parts</li>
-					<li>Strategically upgrading individual Astroons for optimal performance</li>
-					<li>Managing the crucial solar energy resource through merging solar panels</li>
-				</ul>
-				Astroon Idle intricately weaves resource management, merging mechanics, and strategic upgrades,
-				delivering an engaging and rewarding idle gaming experience.</p>
-
-
-				<h2>Code Snippets</h2>
-			</div>
-		</section>
-
-	</div>
-
-	<!-- Footer -->
-	<footer id="footer" class="wrapper alt">
+	<!-- Main -->
+	<section id="main" class="wrapper">
 		<div class="inner">
-			<ul class="menu">
-				<li>&copy; Untitled. All rights reserved.</li>
-				<li>Design: <a href="http://html5up.net">HTML5 UP</a></li>
-			</ul>
-		</div>
-	</footer>
+			<h1 class="major">Astroon Idle</h1>
+			<span class="image fit"><img src="images/AstroonConcept.jpg" alt="" /></span>
+			<p>Astroon Idle, an idle manager mobile game, offers players a dynamic experience with:
 
-	<!-- Scripts -->
-	<script src="assets/js/jquery.min.js"></script>
-	<script src="assets/js/jquery.scrollex.min.js"></script>
-	<script src="assets/js/jquery.scrolly.min.js"></script>
-	<script src="assets/js/browser.min.js"></script>
-	<script src="assets/js/breakpoints.min.js"></script>
-	<script src="assets/js/util.js"></script>
-	<script src="assets/js/main.js"></script>
+			<ul>
+				<li>Unlocking and upgrading buildings for specific purposes</li>
+				<li>Merging hexagon mines to gather basic resources</li>
+				<li>Refining resources to create ship parts</li>
+				<li>Strategically upgrading individual Astroons for optimal performance</li>
+				<li>Managing the crucial solar energy resource through merging solar panels</li>
+			</ul>
+			Astroon Idle intricately weaves resource management, merging mechanics, and strategic upgrades,
+			delivering an engaging and rewarding idle gaming experience.</p>
+
+
+			<h2>Code Snippets</h2>
+			<h3>Game Resources</h3>
+			<pre><code>[Serializable]
+    public class GameResources
+    {
+        [SerializeField]
+        internal Dictionary&ltResourceType, Resource&gt Resources = new Dictionary&ltResourceType, Resource&gt();
+
+        public GameResources()
+        {
+            Resources = new Dictionary&ltResourceType, Resource&gt();
+        }
+
+        public GameResources(Dictionary&ltResourceType, Resource&gt resources)
+        {
+            Resources = resources;
+        }
+
+        public bool HasAtLeast(GameResources requirements)
+        {
+            if (requirements == null)
+                return true;
+
+            foreach (var requirement in requirements.Resources)
+            {
+                if (!(Resources.ContainsKey(requirement.Key) && requirement.Value.Quantity &gt AlphabeticNotation.zero) ||
+                    Resources[requirement.Key] < requirement.Value)
+                    return false;
+            }
+
+
+            return true;
+        }
+
+        public void AddOrCreateResource(ResourceType resourceType, Resource resourceToAdd)
+        {
+            if (Resources.ContainsKey(resourceType))
+            {
+                Resources[resourceType] += resourceToAdd;
+            }
+            else
+            {
+                Resources.Add(resourceType, resourceToAdd);
+            }
+        }
+
+        public static GameResources operator +(GameResources a, GameResources b)
+        {
+            var result = new GameResources(); //a;
+            if (a != null)
+            {
+                foreach (var kvp in a.Resources)
+                {
+                    result.AddOrCreateResource(kvp.Key, kvp.Value);
+                }
+            }
+
+            if (b != null)
+            {
+                foreach (var kvp in b.Resources)
+                {
+                    result.AddOrCreateResource(kvp.Key, kvp.Value);
+                }
+            }
+
+            return result;
+        }
+
+        public static GameResources operator -(GameResources a, GameResources b)
+        {
+            var result = new GameResources(); //a;
+            if (a != null)
+            {
+                foreach (var kvp in a.Resources)
+                {
+                    result.AddOrCreateResource(kvp.Key, kvp.Value);
+                }
+            }
+
+            if (b != null)
+            {
+                foreach (var kvp in b.Resources)
+                {
+                    if (result.Resources.TryGetValue(kvp.Key, out _))
+                    {
+                        result.Resources[kvp.Key] -= kvp.Value;
+                    }
+                    else
+                    {
+                        Debug.LogError(kvp.Key + " not found!");
+                    }
+                }
+            }
+
+            return result;
+        }
+    }</code></pre>
+			<h3>Mine Merger</h3>
+			<pre><code>public class MineMergerRemake : MergerRemake
+{
+    [SerializeField] private MineDataSORemake mineDataSo;
+    [SerializeField] private ResourceType mineralType;
+    [SerializeField] private SpriteRenderer bgSpriteRenderer;
+    [SerializeField] private SpriteRenderer mineSpriteRenderer;
+    [SerializeField] private MineRemake ownMine;
+    [SerializeField] private HexagonRemake ownHex;
+    private RaycastHit2D[] _hit = new RaycastHit2D[2];
+
+    private void Start()
+    {
+        OnMinePressedDown += TurnGreenIfMergeable;
+        OnMinePressedUp += TurnToPreviousColorFromGreen;
+    }
+
+    private void OnDisable()
+    {
+        OnMinePressedDown -= TurnGreenIfMergeable;
+        OnMinePressedUp -= TurnToPreviousColorFromGreen;
+    }
+
+    protected override void OnMouseDown()
+    {
+        Debug.Log($"This mine's initial position: {InitialPos}, Level: {MergeLevel}");
+
+        if (MergeLevel == 0)
+            return;
+
+
+        base.OnMouseDown();
+        OnMinePressedDown?.Invoke(this, new MineEventArgs
+        {
+            Level = MergeLevel,
+            MineralType = mineralType
+        });
+        SetSelectedOrderInLayer();
+    }
+
+    protected override void OnMouseUp()
+    {
+        PanZoom.Instance.mapIsMovable = true;
+
+        if (MergeLevel == 0)
+            return;
+
+        int hitCount = Physics2D.RaycastNonAlloc(transform.position, Vector2.zero, _hit);
+
+        if (hitCount is 0 or 1)
+        {
+            transform.position = InitialPos;
+            OnMinePressedUp?.Invoke(this, EventArgs.Empty);
+            return;
+        }
+
+        RaycastHit2D targetHit = default;
+
+        foreach (var hit in _hit)
+        {
+            Debug.Log($"Hit: {hit.transform.gameObject.name}");
+            if (!hit.transform.TryGetComponent(out MineMergerRemake selfMerger))
+                continue;
+            if (selfMerger == this)
+                continue;
+            targetHit = hit;
+            break;
+        }
+
+        if (targetHit.collider != null)
+        {
+            Debug.Log($"Raycast hit {targetHit.transform.name}");
+            if (targetHit.transform.TryGetComponent(out MineMergerRemake otherMineMerger))
+            {
+                if (otherMineMerger != this)
+                {
+                    if (otherMineMerger.MergeLevel == 0)
+                    {
+                        if (otherMineMerger.ownMine.IsDeactivated())
+                        {
+                            SwitchPlaces(otherMineMerger.transform);
+                        }
+
+                        OnMinePressedUp?.Invoke(this, EventArgs.Empty);
+                        return;
+                    }
+
+                    if (otherMineMerger.mineralType == mineralType)
+                    {
+                        if (otherMineMerger.MergeLevel == MergeLevel)
+                        {
+                            Merge(otherMineMerger);
+                            OnMinePressedUp?.Invoke(this, EventArgs.Empty);
+                            Debug.Log($"Merged {targetHit.transform.name}!");
+                            return;
+                        }
+
+                        Debug.LogError("Merge levels are not the same");
+                    }
+                    else
+                    {
+                        Debug.LogError("Mineral types are different");
+                    }
+                }
+                else
+                {
+                    Debug.LogError($"Trying to merge with itself");
+                }
+            }
+            else
+            {
+                Debug.LogError($"{targetHit.transform.name} does not have a merger");
+            }
+        }
+        else
+        {
+            Debug.LogError("Ray did not hit a mergeable thing!");
+        }
+
+        transform.position = InitialPos;
+        OnMinePressedUp?.Invoke(this, EventArgs.Empty);
+    }
+
+    public new event EventHandler&ltMineEventArgs&gt OnMerge;
+    public event EventHandler&ltMineEventArgs&gt OnBought;
+
+    public static event EventHandler&ltMineEventArgs&gt OnMergeStatic;
+    public static event EventHandler OnBoughtStatic;
+
+    public static event EventHandler&ltMineEventArgs&gt OnMinePressedDown;
+    public static event EventHandler OnMinePressedUp;
+    public static event EventHandler OnPlaceSwitched;
+
+    private void TurnGreenIfMergeable(object sender, MineEventArgs e)
+    {
+        if (e.Level == MergeLevel && e.MineralType == mineralType)
+            bgSpriteRenderer.color = Color.green;
+    }
+
+    private void TurnToPreviousColorFromGreen(object sender, EventArgs e)
+    {
+        if (ownHex.BoostLocation != BoostLocationRemake.None)
+        {
+            bgSpriteRenderer.color = Color.yellow;
+            return;
+        }
+
+        if (bgSpriteRenderer.color != Color.green)
+            return;
+        bgSpriteRenderer.color = Color.white;
+    }
+
+    private void AdjustToBeingBought()
+    {
+        SetNormalOrderInLayer();
+        bgSpriteRenderer.sprite = mineDataSo.GetBackgroundSprite(mineralType);
+        mineSpriteRenderer.sprite = mineDataSo.GetMineSprite(MergeLevel, mineralType);
+    }
+
+    protected override void Merge(MergerRemake otherMerger)
+    {
+        base.Merge(otherMerger);
+
+        MineMergerRemake otherMineMerger = otherMerger as MineMergerRemake;
+
+        otherMineMerger.SetVisuals();
+        RemoveVisuals();
+
+        MineManager.Instance.AddNewMine(otherMineMerger.ownMine);
+        MineManager.Instance.RemoveMine(ownMine);
+        MineManager.Instance.CalculateMineCountsAndGeneration();
+
+        OnMerge?.Invoke(this, new MineEventArgs { Level = MergeLevel, MineralType = mineralType });
+        otherMineMerger.OnMerge?.Invoke(otherMineMerger,
+            new MineEventArgs
+            {
+                Level = otherMineMerger.MergeLevel, MineralType = otherMineMerger.mineralType,
+                mineSprite = otherMineMerger.bgSpriteRenderer.sprite
+            });
+        OnMergeStatic?.Invoke(this,
+            new MineEventArgs
+            {
+                Level = otherMineMerger.MergeLevel, MineralType = otherMineMerger.mineralType,
+                mineSprite = otherMineMerger.mineSpriteRenderer.sprite
+            });
+    }
+
+    private void SwitchPlaces(Transform otherHex)
+    {
+        if (!otherHex.TryGetComponent(out HexagonRemake hex) || !hex.GetVisibleStatus())
+        {
+            transform.position = InitialPos;
+            return;
+        }
+
+
+        transform.position = otherHex.position;
+        otherHex.position = InitialPos;
+
+        OnPlaceSwitched?.Invoke(this, EventArgs.Empty);
+    }
+
+    private void SetVisuals()
+    {
+        SetNormalOrderInLayer();
+        bgSpriteRenderer.sprite = mineDataSo.GetBackgroundSprite(mineralType);
+        mineSpriteRenderer.sprite = mineDataSo.GetMineSprite(MergeLevel, mineralType);
+    }
+
+    private void RemoveVisuals()
+    {
+        bgSpriteRenderer.sortingOrder = MineSortingLayersSO.EMPTY_ORDER_IN_LAYER;
+        bgSpriteRenderer.sprite = mineDataSo.emptyBg;
+        mineSpriteRenderer.sprite = null;
+    }
+
+    public ResourceType GetMineralType()
+    {
+        return mineralType;
+    }
+
+    public void SetMineralType(ResourceType targetMineralType)
+    {
+        mineralType = targetMineralType;
+    }
+
+    public void GetBought()
+    {
+        MergeLevel += 1;
+        AdjustToBeingBought();
+        MineManager.Instance.AddNewMine(ownMine);
+        MineManager.Instance.CalculateMineCountsAndGeneration();
+        OnBought?.Invoke(this, new MineEventArgs { Level = MergeLevel, MineralType = mineralType });
+    }
+
+    private void SetNormalOrderInLayer()
+    {
+        bgSpriteRenderer.sortingOrder = MineSortingLayersSO.MINE_BG_ORDER_IN_LAYER;
+        mineSpriteRenderer.sortingOrder = MineSortingLayersSO.MINE_UNIT_ORDER_IN_LAYER;
+    }
+
+    private void SetSelectedOrderInLayer()
+    {
+        bgSpriteRenderer.sortingOrder = MineSortingLayersSO.SELECTED_MINE_BG_ORDER_IN_LAYER;
+        mineSpriteRenderer.sortingOrder = MineSortingLayersSO.SELECTED_MINE_UNIT_ORDER_IN_LAYER;
+    }
+}</code></pre>
+		</div>
+	</section>
+
+</div>
+
+<!-- Footer -->
+<footer id="footer" class="wrapper alt">
+	<div class="inner">
+		<ul class="menu">
+			<li>&copy; Untitled. All rights reserved.</li>
+			<li>Design: <a href="http://html5up.net">HTML5 UP</a></li>
+		</ul>
+	</div>
+</footer>
+
+<!-- Scripts -->
+<script src="assets/js/jquery.min.js"></script>
+<script src="assets/js/jquery.scrollex.min.js"></script>
+<script src="assets/js/jquery.scrolly.min.js"></script>
+<script src="assets/js/browser.min.js"></script>
+<script src="assets/js/breakpoints.min.js"></script>
+<script src="assets/js/util.js"></script>
+<script src="assets/js/main.js"></script>
 
 </body>
 
