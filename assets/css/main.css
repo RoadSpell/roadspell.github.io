@@ -3907,3 +3907,20 @@ input, select, textarea {
 			}
 
 		}
+
+/* === 9:16 uniform cards that behave like 'Fill' wallpaper === */
+.spotlights > section > .image {
+    aspect-ratio: 9 / 16;          /* fixes the card shape */
+    width: 64rem;                   /* desktop width (adjust to taste) */
+    height: auto !important;        /* remove the old 50vh constraint */
+    background-position: center;    /* focal point */
+    background-size: cover !important; /* 'Fill' behavior (uniform scale + crop) */
+    background-repeat: no-repeat;
+}
+
+@media (max-width: 980px) {
+    .spotlights > section > .image {
+        width: 100%;
+        height: auto !important;      /* the aspect-ratio controls height */
+    }
+}
