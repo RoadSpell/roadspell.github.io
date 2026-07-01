@@ -1,238 +1,168 @@
 <!DOCTYPE HTML>
-<!--
-	Hyperspace by HTML5 UP
-	html5up.net | @ajlkn
-	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
--->
-<html>
-
+<html lang="en-US">
 <head>
-    <title>MERT YILMAZ - Game Development & Design Portfolio</title>
+    <title>Symbi-Node — Mert Yılmaz</title>
     <meta charset="utf-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <link rel="stylesheet" href="assets/css/main.css"/>
-    <noscript>
-        <link rel="stylesheet" href="assets/css/noscript.css"/>
-    </noscript>
 </head>
+<body>
+<main class="container">
 
-<body class="is-preload">
+    <header class="site-header">
+        <a href="index.html" class="site-title">MERT YILMAZ</a>
+        <nav class="site-nav">
+            <a href="index.html">Home</a>
+        </nav>
+    </header>
 
-<!-- Header -->
-<header id="header">
-    <a href="index.html" class="title">MERT YILMAZ</a>
-    <nav>
-        <ul>
-            <li><a href="index.html">Home</a></li>
-            <li><a href="generic.html" class="active">Generic</a></li>
-            <li><a href="elements.html">Elements</a></li>
-        </ul>
-    </nav>
-</header>
+    <a href="index.html#projects" class="back-link">← All projects</a>
 
-<!-- Wrapper -->
-<div id="wrapper">
+    <article>
+        <h1>Symbi-Node</h1>
+        <p class="project-meta"><em>Type:</em> Survivor-like · <em>Jam:</em> HUJAM 72h (2nd place) · <em>Engine:</em> Unity</p>
 
-    <!-- Main -->
-    <section id="main" class="wrapper">
-        <div class="inner">
-            <h1 class="major">Symbi-Node</h1>
-            <span class="image fit"><img src="images/SymbiNodeGameplay.png" alt=""/></span>
-            <p>SymbiNode, a survivor-like game developed within a 72-hour game jam using Unity. In this project, I
-                implemented an enemy spawn
-                and stage progression system using scriptable objects to efficiently store crucial data. This
-                approach provided flexibility for quick adjustments during the time-constrained game jam.</p>
-            <iframe style="display: block; margin: 0 auto;" width="560" height="315"
-                    src="https://www.youtube.com/embed/Jt2iFPfkEgI?si=mpFMdd-nmjlSrNex"
-                    title="YouTube video player" frameborder="0"
+        <img src="images/SymbiNodeGameplay.png" alt="Symbi-Node" class="article-image"/>
+
+        <p>Symbi-Node is a survivor-like game developed in a 72-hour game jam. I implemented an enemy spawn and stage progression system using ScriptableObjects to efficiently store crucial data — providing flexibility for quick adjustments during the time-constrained jam.</p>
+
+        <div class="video">
+            <iframe src="https://www.youtube.com/embed/Jt2iFPfkEgI?si=mpFMdd-nmjlSrNex"
+                    title="Symbi-Node gameplay"
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                     referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-
-            <h2>Code Snippets</h2>
-            <h3>Object Pooler</h3>
-            <pre><code>public class ObjectPooler : MonoBehaviour
-{
-    public List&ltPool&gt PoolList = new List&ltPool&gt();
-    public ObjectPooler Instance { get; private set; }
-
-    private void Awake()
-    {
-        if (Instance != null)
-        {
-            Destroy(this.gameObject);
-        }
-        else
-        {
-            Instance = this;
-        }
-    }
-
-    private void Start()
-    {
-        foreach (var pool in PoolList)
-        {
-            for (int i = 0; i < pool.PoolStartSize; i++)
-            {
-                GameObject newObject = Instantiate(pool.Prefab) as GameObject;
-                pool.ObjectPool.Enqueue(newObject);
-                newObject.SetActive(false);
-            }
-        }
-    }
-
-    public GameObject GetObject(string poolTag)
-    {
-        var desiredPool = PoolList.Find(p => p.Tag == poolTag);
-
-        if (desiredPool.ObjectPool.Count > 0)
-        {
-            GameObject newObject = desiredPool.ObjectPool.Dequeue();
-            newObject.SetActive(true);
-            return newObject;
-        }
-        else
-        {
-            GameObject newObject = Instantiate(desiredPool.Prefab) as GameObject;
-            return newObject;
-        }
-    }
-
-    public GameObject GetObject(GameObject targetPrefab)
-    {
-        var desiredPool = PoolList.Find(p => p.Tag == targetPrefab.GetComponent&ltEnemy&gt().valuesSO.tag);
-        Debug.Log("Desired pool is " + desiredPool.Tag);
-
-        if (desiredPool.ObjectPool.Count > 0)
-        {
-            GameObject newObject = desiredPool.ObjectPool.Dequeue();
-            newObject.SetActive(true);
-            return newObject;
-        }
-        else
-        {
-            GameObject newObject = Instantiate(desiredPool.Prefab) as GameObject;
-            return newObject;
-        }
-    }
-
-    public void ReturnObject(string poolTag, GameObject objectToReturn)
-    {
-        var desiredPool = PoolList.Find(p => p.Tag == poolTag);
-
-        desiredPool.ObjectPool.Enqueue(objectToReturn);
-        objectToReturn.SetActive(false);
-    }
-
-    [Serializable]
-    public class Pool
-    {
-        public string Tag;
-        public GameObject Prefab;
-        public int PoolStartSize = 5;
-        public Queue&ltGameObject&gt ObjectPool = new Queue&ltGameObject&gt();
-    }
-}</code></pre>
-            <h3>Spawner</h3>
-            <pre><code>public class SpawnerAdvanced : MonoBehaviour
-{
-    [SerializeField] private List&ltStageSO&gt allStages = new List&ltStageSO&gt();
-    [SerializeField] private GameObject bossPrefab;
-    [SerializeField] private float bossSpawnTime;
-    public List&ltTransform&gt spawnPlaces;
-    private bool _bossSpawned = false;
-    private StageSO _currentStage;
-
-    private ObjectPooler _objectPool;
-    private int _stageIndex = 0;
-    public Queue&ltGameObject&gt EnemyQueue = new Queue&ltGameObject&gt();
-
-
-    private void Start()
-    {
-        _objectPool = FindObjectOfType&ltObjectPooler&gt();
-        _currentStage = allStages[_stageIndex];
-        SetEnemyQueue();
-
-        Invoke(nameof(SpawnBoss), bossSpawnTime);
-    }
-
-    private void FixedUpdate()
-    {
-        SpawnNonBossEnemies();
-    }
-
-    private void SetEnemyQueue()
-    {
-        foreach (var enemy in _currentStage.enemies)
-        {
-            EnemyQueue.Enqueue(enemy);
-        }
-    }
-
-    private void SpawnNonBossEnemies()
-    {
-        if (!_bossSpawned)
-        {
-            _currentStage.timeSinceSpawn += Time.deltaTime;
-
-            if (_currentStage.timeSinceSpawn >= _currentStage.timeTakesToSpawn)
-            {
-                if (EnemyQueue.Count <= 0)
-                {
-                    if (_stageIndex + 1 != allStages.Count)
-                    {
-                        _stageIndex++;
-                        _currentStage = allStages[_stageIndex];
-                        SetEnemyQueue();
-                    }
-                    else
-                    {
-                        Debug.Log("Stage finished, stage was " + _currentStage);
-                        //this.gameObject.SetActive(false);
-                    }
-                }
-                else
-                {
-                    Debug.Log(EnemyQueue.Peek());
-                    GameObject newObject = _objectPool.GetObject(EnemyQueue.Dequeue());
-                    newObject.transform.position = spawnPlaces[Random.Range(0, spawnPlaces.Count)].position;
-                    newObject.SetActive(true);
-                    _currentStage.timeSinceSpawn = 0f;
-                }
-            }
-        }
-    }
-
-    private void SpawnBoss()
-    {
-        Instantiate(bossPrefab, spawnPlaces[Random.Range(0, spawnPlaces.Count)]);
-        _bossSpawned = true;
-    }
-}</code></pre>
         </div>
-    </section>
 
-</div>
+        <p><a href="https://wakergames.itch.io/symbinode">itch.io ↗</a></p>
 
-<!-- Footer -->
-<footer id="footer" class="wrapper alt">
-    <div class="inner">
-        <ul class="menu">
-            <li>&copy; Untitled. All rights reserved.</li>
-            <li>Design: <a href="http://html5up.net">HTML5 UP</a></li>
-        </ul>
-    </div>
-</footer>
+        <h2>Code Snippets</h2>
 
-<!-- Scripts -->
-<script src="assets/js/jquery.min.js"></script>
-<script src="assets/js/jquery.scrollex.min.js"></script>
-<script src="assets/js/jquery.scrolly.min.js"></script>
-<script src="assets/js/browser.min.js"></script>
-<script src="assets/js/breakpoints.min.js"></script>
-<script src="assets/js/util.js"></script>
-<script src="assets/js/main.js"></script>
+        <h3>Object Pooler</h3>
+        <pre><code><span class="tok-kw">public</span> <span class="tok-kw">class</span> ObjectPooler : MonoBehaviour
+{
+    <span class="tok-kw">public</span> List&lt;Pool&gt; PoolList = <span class="tok-kw">new</span> <span class="tok-fn">List</span>&lt;Pool&gt;();
+    <span class="tok-kw">public</span> ObjectPooler Instance { <span class="tok-kw">get</span>; <span class="tok-kw">private</span> <span class="tok-kw">set</span>; }
 
+    <span class="tok-kw">private</span> <span class="tok-kw">void</span> <span class="tok-fn">Awake</span>()
+    {
+        <span class="tok-kw">if</span> (Instance != <span class="tok-kw">null</span>)
+            <span class="tok-fn">Destroy</span>(<span class="tok-kw">this</span>.gameObject);
+        <span class="tok-kw">else</span>
+            Instance = <span class="tok-kw">this</span>;
+    }
+
+    <span class="tok-kw">private</span> <span class="tok-kw">void</span> <span class="tok-fn">Start</span>()
+    {
+        <span class="tok-kw">foreach</span> (<span class="tok-kw">var</span> pool <span class="tok-kw">in</span> PoolList)
+        {
+            <span class="tok-kw">for</span> (<span class="tok-kw">int</span> i = <span class="tok-num">0</span>; i &lt; pool.PoolStartSize; i++)
+            {
+                GameObject newObject = <span class="tok-fn">Instantiate</span>(pool.Prefab) <span class="tok-kw">as</span> GameObject;
+                pool.ObjectPool.<span class="tok-fn">Enqueue</span>(newObject);
+                newObject.<span class="tok-fn">SetActive</span>(<span class="tok-kw">false</span>);
+            }
+        }
+    }
+
+    <span class="tok-kw">public</span> GameObject <span class="tok-fn">GetObject</span>(<span class="tok-kw">string</span> poolTag)
+    {
+        <span class="tok-kw">var</span> desiredPool = PoolList.<span class="tok-fn">Find</span>(p =&gt; p.Tag == poolTag);
+
+        <span class="tok-kw">if</span> (desiredPool.ObjectPool.Count &gt; <span class="tok-num">0</span>)
+        {
+            GameObject newObject = desiredPool.ObjectPool.<span class="tok-fn">Dequeue</span>();
+            newObject.<span class="tok-fn">SetActive</span>(<span class="tok-kw">true</span>);
+            <span class="tok-kw">return</span> newObject;
+        }
+        <span class="tok-kw">return</span> <span class="tok-fn">Instantiate</span>(desiredPool.Prefab) <span class="tok-kw">as</span> GameObject;
+    }
+
+    <span class="tok-kw">public</span> <span class="tok-kw">void</span> <span class="tok-fn">ReturnObject</span>(<span class="tok-kw">string</span> poolTag, GameObject objectToReturn)
+    {
+        <span class="tok-kw">var</span> desiredPool = PoolList.<span class="tok-fn">Find</span>(p =&gt; p.Tag == poolTag);
+        desiredPool.ObjectPool.<span class="tok-fn">Enqueue</span>(objectToReturn);
+        objectToReturn.<span class="tok-fn">SetActive</span>(<span class="tok-kw">false</span>);
+    }
+
+    [<span class="tok-attr">Serializable</span>]
+    <span class="tok-kw">public</span> <span class="tok-kw">class</span> Pool
+    {
+        <span class="tok-kw">public</span> <span class="tok-kw">string</span> Tag;
+        <span class="tok-kw">public</span> GameObject Prefab;
+        <span class="tok-kw">public</span> <span class="tok-kw">int</span> PoolStartSize = <span class="tok-num">5</span>;
+        <span class="tok-kw">public</span> Queue&lt;GameObject&gt; ObjectPool = <span class="tok-kw">new</span> <span class="tok-fn">Queue</span>&lt;GameObject&gt;();
+    }
+}</code></pre>
+
+        <h3>Spawner</h3>
+        <pre><code><span class="tok-kw">public</span> <span class="tok-kw">class</span> SpawnerAdvanced : MonoBehaviour
+{
+    [<span class="tok-attr">SerializeField</span>] <span class="tok-kw">private</span> List&lt;StageSO&gt; allStages = <span class="tok-kw">new</span> <span class="tok-fn">List</span>&lt;StageSO&gt;();
+    [<span class="tok-attr">SerializeField</span>] <span class="tok-kw">private</span> GameObject bossPrefab;
+    [<span class="tok-attr">SerializeField</span>] <span class="tok-kw">private</span> <span class="tok-kw">float</span> bossSpawnTime;
+    <span class="tok-kw">public</span> List&lt;Transform&gt; spawnPlaces;
+    <span class="tok-kw">private</span> <span class="tok-kw">bool</span> _bossSpawned = <span class="tok-kw">false</span>;
+    <span class="tok-kw">private</span> StageSO _currentStage;
+    <span class="tok-kw">private</span> ObjectPooler _objectPool;
+    <span class="tok-kw">private</span> <span class="tok-kw">int</span> _stageIndex = <span class="tok-num">0</span>;
+    <span class="tok-kw">public</span> Queue&lt;GameObject&gt; EnemyQueue = <span class="tok-kw">new</span> <span class="tok-fn">Queue</span>&lt;GameObject&gt;();
+
+    <span class="tok-kw">private</span> <span class="tok-kw">void</span> <span class="tok-fn">Start</span>()
+    {
+        _objectPool = <span class="tok-fn">FindObjectOfType</span>&lt;ObjectPooler&gt;();
+        _currentStage = allStages[_stageIndex];
+        <span class="tok-fn">SetEnemyQueue</span>();
+        <span class="tok-fn">Invoke</span>(<span class="tok-kw">nameof</span>(SpawnBoss), bossSpawnTime);
+    }
+
+    <span class="tok-kw">private</span> <span class="tok-kw">void</span> <span class="tok-fn">FixedUpdate</span>()
+    {
+        <span class="tok-fn">SpawnNonBossEnemies</span>();
+    }
+
+    <span class="tok-kw">private</span> <span class="tok-kw">void</span> <span class="tok-fn">SetEnemyQueue</span>()
+    {
+        <span class="tok-kw">foreach</span> (<span class="tok-kw">var</span> enemy <span class="tok-kw">in</span> _currentStage.enemies)
+            EnemyQueue.<span class="tok-fn">Enqueue</span>(enemy);
+    }
+
+    <span class="tok-kw">private</span> <span class="tok-kw">void</span> <span class="tok-fn">SpawnNonBossEnemies</span>()
+    {
+        <span class="tok-kw">if</span> (_bossSpawned) <span class="tok-kw">return</span>;
+
+        _currentStage.timeSinceSpawn += Time.deltaTime;
+        <span class="tok-kw">if</span> (_currentStage.timeSinceSpawn &lt; _currentStage.timeTakesToSpawn) <span class="tok-kw">return</span>;
+
+        <span class="tok-kw">if</span> (EnemyQueue.Count &lt;= <span class="tok-num">0</span>)
+        {
+            <span class="tok-kw">if</span> (_stageIndex + <span class="tok-num">1</span> != allStages.Count)
+            {
+                _stageIndex++;
+                _currentStage = allStages[_stageIndex];
+                <span class="tok-fn">SetEnemyQueue</span>();
+            }
+        }
+        <span class="tok-kw">else</span>
+        {
+            GameObject newObject = _objectPool.<span class="tok-fn">GetObject</span>(EnemyQueue.<span class="tok-fn">Dequeue</span>());
+            newObject.transform.position = spawnPlaces[Random.<span class="tok-fn">Range</span>(<span class="tok-num">0</span>, spawnPlaces.Count)].position;
+            newObject.<span class="tok-fn">SetActive</span>(<span class="tok-kw">true</span>);
+            _currentStage.timeSinceSpawn = <span class="tok-num">0f</span>;
+        }
+    }
+
+    <span class="tok-kw">private</span> <span class="tok-kw">void</span> <span class="tok-fn">SpawnBoss</span>()
+    {
+        <span class="tok-fn">Instantiate</span>(bossPrefab, spawnPlaces[Random.<span class="tok-fn">Range</span>(<span class="tok-num">0</span>, spawnPlaces.Count)]);
+        _bossSpawned = <span class="tok-kw">true</span>;
+    }
+}</code></pre>
+    </article>
+
+    <footer class="site-footer">
+        <span>© Mert Yılmaz</span>
+    </footer>
+
+</main>
 </body>
-
 </html>

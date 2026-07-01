@@ -1,366 +1,221 @@
 <!DOCTYPE HTML>
-<!--
-	Hyperspace by HTML5 UP
-	html5up.net | @ajlkn
-	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
--->
 <html lang="en-US">
-
 <head>
-    <title>MERT YILMAZ - Game Development & Design Portfolio</title>
+    <title>Hazard Survivor — Mert Yılmaz</title>
     <meta charset="utf-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <link rel="stylesheet" href="assets/css/main.css"/>
-    <noscript>
-        <link rel="stylesheet" href="assets/css/noscript.css"/>
-    </noscript>
 </head>
+<body>
+<main class="container">
 
-<body class="is-preload">
+    <header class="site-header">
+        <a href="index.html" class="site-title">MERT YILMAZ</a>
+        <nav class="site-nav">
+            <a href="index.html">Home</a>
+        </nav>
+    </header>
 
-<!-- Header -->
-<header id="header">
-    <a href="index.html" class="title">MERT YILMAZ</a>
-    <nav>
-        <ul>
-            <li><a href="index.html">Home</a></li>
-            <li><a href="generic.html" class="active">Generic</a></li>
-            <li><a href="elements.html">Elements</a></li>
-        </ul>
-    </nav>
-</header>
+    <a href="index.html#projects" class="back-link">← All projects</a>
 
-<!-- Wrapper -->
-<div id="wrapper">
+    <article>
+        <h1>Hazard Survivor</h1>
+        <p class="project-meta"><em>Type:</em> Casual Mobile Runner · <em>Engine:</em> Unity</p>
 
-    <!-- Main -->
-    <section id="main" class="wrapper">
-        <div class="inner">
-            <h1 class="major">Hazard Survivor</h1>
-            <!--<span class="image fit"><img src="images/pic04.jpg" alt=""/></span>-->
-            <p>In the development of Hazard Survivor, my contributions include the implementation of diverse
-                obstacles, enemies, and their behaviors. Additionally, I engineered a road generation system,
-                incorporating both random and weighted random elements to ensure dynamic and engaging level layouts
-                to give a basis to work on for level design.</p>
-            <h2>Code Snippets</h2>
-            <h3>Player</h3>
-            <pre><code>public class Player : Character
+        <img src="images/HazardSurvivor.png" alt="Hazard Survivor" class="article-image"/>
+
+        <p>In the development of Hazard Survivor, my contributions include implementing diverse obstacles, enemies, and their behaviors. I also engineered a road generation system incorporating both random and weighted-random elements to ensure dynamic and engaging level layouts as a basis for level design.</p>
+
+        <h2>Code Snippets</h2>
+
+        <h3>Player</h3>
+        <pre><code><span class="tok-kw">public</span> <span class="tok-kw">class</span> Player : Character
 {
-    public delegate void OnPlayerDead();
+    <span class="tok-kw">public</span> <span class="tok-kw">delegate</span> <span class="tok-kw">void</span> <span class="tok-fn">OnPlayerDead</span>();
+    <span class="tok-kw">public</span> <span class="tok-kw">static</span> OnPlayerDead playerDied;
 
-    public static OnPlayerDead playerDied;
-    public FloatingJoystick _joystick;
-    public GameObject _deadScene;
-    public GameObject _gamehud;
-    public AudioSource _themeSong;
-    [SerializeField] private CinemachineVirtualCamera cmVcam;
-    public bool isBeingKilled = false;
-    [SerializeField] internal BoxManager _boxManager;
+    <span class="tok-kw">public</span> FloatingJoystick _joystick;
+    <span class="tok-kw">public</span> GameObject _deadScene;
+    <span class="tok-kw">public</span> GameObject _gamehud;
+    <span class="tok-kw">public</span> AudioSource _themeSong;
+    [<span class="tok-attr">SerializeField</span>] <span class="tok-kw">private</span> CinemachineVirtualCamera cmVcam;
+    <span class="tok-kw">public</span> <span class="tok-kw">bool</span> isBeingKilled = <span class="tok-kw">false</span>;
+    [<span class="tok-attr">SerializeField</span>] <span class="tok-kw">internal</span> BoxManager _boxManager;
 
-
-    private void Awake()
+    <span class="tok-kw">private</span> <span class="tok-kw">void</span> <span class="tok-fn">Awake</span>()
     {
-        characterRigidbody = GetComponent&ltRigidbody&gt();
+        characterRigidbody = <span class="tok-fn">GetComponent</span>&lt;Rigidbody&gt;();
     }
 
-    private void Start()
+    <span class="tok-kw">private</span> <span class="tok-kw">void</span> <span class="tok-fn">Start</span>()
     {
-        CanMove = true;
+        CanMove = <span class="tok-kw">true</span>;
     }
 
-    private void OnEnable()
+    <span class="tok-kw">private</span> <span class="tok-kw">void</span> <span class="tok-fn">OnEnable</span>()
     {
         playerDied += characterDeath.SlowTime;
         playerDied += StopCamera;
     }
 
-    private void OnDisable()
+    <span class="tok-kw">private</span> <span class="tok-kw">void</span> <span class="tok-fn">OnDisable</span>()
     {
         playerDied -= characterDeath.SlowTime;
         playerDied -= StopCamera;
     }
 
-    private void StopCamera()
+    <span class="tok-kw">private</span> <span class="tok-kw">void</span> <span class="tok-fn">StopCamera</span>()
     {
-        cmVcam.Follow = null;
-        cmVcam.LookAt = null;
+        cmVcam.Follow = <span class="tok-kw">null</span>;
+        cmVcam.LookAt = <span class="tok-kw">null</span>;
     }
 
-    public void GetKilled(Transform hostileTransform, float localXOffset, float localZOffset, Action playerAnimation)
+    <span class="tok-kw">public</span> <span class="tok-kw">void</span> <span class="tok-fn">GetKilled</span>(Transform hostileTransform, <span class="tok-kw">float</span> localXOffset, <span class="tok-kw">float</span> localZOffset, Action playerAnimation)
     {
-        GetComponent&ltCharacter&gt().CanMove = false;
-        this.transform.parent = hostileTransform;
+        <span class="tok-fn">GetComponent</span>&lt;Character&gt;().CanMove = <span class="tok-kw">false</span>;
+        <span class="tok-kw">this</span>.transform.parent = hostileTransform;
         transform.localRotation = Quaternion.identity;
-        Vector3 newPosition = new Vector3(transform.localPosition.x + localXOffset, transform.localPosition.y, transform.localPosition.z + localZOffset);
+        Vector3 newPosition = <span class="tok-kw">new</span> <span class="tok-fn">Vector3</span>(
+            transform.localPosition.x + localXOffset,
+            transform.localPosition.y,
+            transform.localPosition.z + localZOffset);
         transform.localPosition = newPosition;
-        playerAnimation();
-    }
-}
-				</code></pre>
-
-            <h3>Turret Behaviour</h3>
-            <pre><code>public class TurretBehaviour : MonoBehaviour, IDamageDealer
-{
-    [SerializeField] private float shootingDuration;
-    [SerializeField] AudioSource audioData;
-    [SerializeField] private AudioClip shootingSfx;
-    [SerializeField] private AudioClip laserSfx;
-    [SerializeField] private AudioClip overheatSfx;
-    [SerializeField] ParticleSystem bulletParticleEffect;
-    [SerializeField] Collider shootingCollider;
-    [SerializeField] private float horizontalForceRadius;
-    [SerializeField] private LineRenderer lineRenderer;
-    [SerializeField] private float laserKickStartAmount;
-
-    private bool _readyToShoot;
-    private Renderer _renderer;
-
-    void Start()
-    {
-        StartCoroutine(Fire());
-    }
-
-    void OnEnable()
-    {
-        lineRenderer = GetComponent&ltLineRenderer&gt();
-        _renderer = GetComponent&ltRenderer&gt();
-    }
-
-    private void OnTriggerEnter(Collider other)
-    {
-        DealDamage(other.gameObject);
-    }
-
-    public void DealDamage(GameObject other)
-    {
-        other.GetComponent&ltDeath&gt()?.Die(other.TryGetComponent(out Player temp), DeathCause.Turret,
-            horizontalForceRadius, null);
-    }
-
-    private IEnumerator Fire()      // OverheatSFX - green, LaserSFX - yellow, Shooting - red
-    {
-        while (_renderer.enabled)
-        {
-            SetShooting(true);
-            SetLaserColor(Color.red);
-
-            yield return new WaitForSeconds(shootingDuration);
-
-            SetShooting(false);
-            SetLaserColor(Color.clear);
-            yield return new WaitForSeconds(overheatSfx.length);
-
-            SetLaserColor(new Color(255,215,0));    // Gold
-            KickStartLaser();
-
-            audioData.clip = laserSfx;
-            if (!audioData.isPlaying)
-                audioData.PlayDelayed(0.3f);
-
-            StartCoroutine(FadeInLaser());
-
-            yield return new WaitUntil(() => _readyToShoot);
-        }
-    }
-
-    void SetShooting(bool shootingState) //Plays overheat sfx if set to false!
-    {
-        if (shootingState)
-        {
-            shootingCollider.enabled = true;
-            audioData.clip = shootingSfx;
-
-            if (!audioData.isPlaying)
-                audioData.Play();
-
-            bulletParticleEffect.Play();
-        }
-        else
-        {
-            bulletParticleEffect.Stop();
-            shootingCollider.enabled = false;
-            _readyToShoot = false;
-
-            if (audioData.isPlaying)
-                audioData.Stop();
-
-            audioData.clip = overheatSfx;
-            if (!audioData.isPlaying)
-                audioData.Play();
-        }
-    }
-
-    void KickStartLaser()
-    {
-        var currentMaterialStartColor =
-            lineRenderer
-                .startColor;
-        var currentMaterialEndColor = lineRenderer.endColor;
-
-        currentMaterialStartColor.a = laserKickStartAmount;
-        currentMaterialEndColor.a = laserKickStartAmount;
-
-        lineRenderer.startColor = currentMaterialStartColor;
-        lineRenderer.endColor = currentMaterialEndColor;
-    }
-
-    private IEnumerator FadeInLaser()
-    {
-        while (lineRenderer.startColor.a < 1f)
-        {
-            var currentMaterialStartColor =
-                lineRenderer
-                    .startColor;
-            var currentMaterialEndColor = lineRenderer.endColor;
-
-            currentMaterialStartColor.a += 0.01f;
-            currentMaterialStartColor.a += 0.01f;
-
-            lineRenderer.startColor = currentMaterialStartColor;
-            lineRenderer.endColor = currentMaterialEndColor;
-
-            yield return new WaitForSeconds(0.04f);
-        }
-
-        _readyToShoot = true;
-    }
-
-    void SetLaserColor(Color newColor)
-    {
-        Gradient tempGradient = new Gradient();
-
-        GradientColorKey[] tempColorKeys = new GradientColorKey[2];
-        tempColorKeys[0] = new GradientColorKey(newColor, 0);
-        tempColorKeys[1] = new GradientColorKey(newColor, 1);
-
-        tempGradient.colorKeys = tempColorKeys;
-        lineRenderer.colorGradient = tempGradient;
+        <span class="tok-fn">playerAnimation</span>();
     }
 }</code></pre>
 
-            <h3>Ragdoll Manager</h3>
-            <pre><code>public class RagdollManager : MonoBehaviour
+        <h3>Turret Behaviour</h3>
+        <pre><code><span class="tok-kw">public</span> <span class="tok-kw">class</span> TurretBehaviour : MonoBehaviour, IDamageDealer
 {
-    public BoxCollider mainCollider;
-    public GameObject mainRig;
+    [<span class="tok-attr">SerializeField</span>] <span class="tok-kw">private</span> <span class="tok-kw">float</span> shootingDuration;
+    [<span class="tok-attr">SerializeField</span>] AudioSource audioData;
+    [<span class="tok-attr">SerializeField</span>] <span class="tok-kw">private</span> AudioClip shootingSfx;
+    [<span class="tok-attr">SerializeField</span>] <span class="tok-kw">private</span> AudioClip laserSfx;
+    [<span class="tok-attr">SerializeField</span>] <span class="tok-kw">private</span> AudioClip overheatSfx;
+    [<span class="tok-attr">SerializeField</span>] ParticleSystem bulletParticleEffect;
+    [<span class="tok-attr">SerializeField</span>] Collider shootingCollider;
+    [<span class="tok-attr">SerializeField</span>] <span class="tok-kw">private</span> <span class="tok-kw">float</span> horizontalForceRadius;
+    [<span class="tok-attr">SerializeField</span>] <span class="tok-kw">private</span> LineRenderer lineRenderer;
+    [<span class="tok-attr">SerializeField</span>] <span class="tok-kw">private</span> <span class="tok-kw">float</span> laserKickStartAmount;
 
-    public Animator mainAnimator;
+    <span class="tok-kw">private</span> <span class="tok-kw">bool</span> _readyToShoot;
+    <span class="tok-kw">private</span> Renderer _renderer;
 
-    private Character character;
+    <span class="tok-kw">void</span> <span class="tok-fn">Start</span>() { <span class="tok-fn">StartCoroutine</span>(<span class="tok-fn">Fire</span>()); }
+
+    <span class="tok-kw">void</span> <span class="tok-fn">OnEnable</span>()
+    {
+        lineRenderer = <span class="tok-fn">GetComponent</span>&lt;LineRenderer&gt;();
+        _renderer = <span class="tok-fn">GetComponent</span>&lt;Renderer&gt;();
+    }
+
+    <span class="tok-kw">private</span> <span class="tok-kw">void</span> <span class="tok-fn">OnTriggerEnter</span>(Collider other) { <span class="tok-fn">DealDamage</span>(other.gameObject); }
+
+    <span class="tok-kw">public</span> <span class="tok-kw">void</span> <span class="tok-fn">DealDamage</span>(GameObject other)
+    {
+        other.<span class="tok-fn">GetComponent</span>&lt;Death&gt;()?.<span class="tok-fn">Die</span>(
+            other.<span class="tok-fn">TryGetComponent</span>(<span class="tok-kw">out</span> Player temp),
+            DeathCause.Turret,
+            horizontalForceRadius, <span class="tok-kw">null</span>);
+    }
+
+    <span class="tok-kw">private</span> IEnumerator <span class="tok-fn">Fire</span>()
+    {
+        <span class="tok-kw">while</span> (_renderer.enabled)
+        {
+            <span class="tok-fn">SetShooting</span>(<span class="tok-kw">true</span>);
+            <span class="tok-fn">SetLaserColor</span>(Color.red);
+            <span class="tok-kw">yield</span> <span class="tok-kw">return</span> <span class="tok-kw">new</span> <span class="tok-fn">WaitForSeconds</span>(shootingDuration);
+
+            <span class="tok-fn">SetShooting</span>(<span class="tok-kw">false</span>);
+            <span class="tok-fn">SetLaserColor</span>(Color.clear);
+            <span class="tok-kw">yield</span> <span class="tok-kw">return</span> <span class="tok-kw">new</span> <span class="tok-fn">WaitForSeconds</span>(overheatSfx.length);
+
+            <span class="tok-fn">SetLaserColor</span>(<span class="tok-kw">new</span> <span class="tok-fn">Color</span>(<span class="tok-num">255</span>, <span class="tok-num">215</span>, <span class="tok-num">0</span>));
+            <span class="tok-fn">KickStartLaser</span>();
+
+            audioData.clip = laserSfx;
+            <span class="tok-kw">if</span> (!audioData.isPlaying)
+                audioData.<span class="tok-fn">PlayDelayed</span>(<span class="tok-num">0.3f</span>);
+
+            <span class="tok-fn">StartCoroutine</span>(<span class="tok-fn">FadeInLaser</span>());
+            <span class="tok-kw">yield</span> <span class="tok-kw">return</span> <span class="tok-kw">new</span> <span class="tok-fn">WaitUntil</span>(() =&gt; _readyToShoot);
+        }
+    }
+}</code></pre>
+
+        <h3>Ragdoll Manager</h3>
+        <pre><code><span class="tok-kw">public</span> <span class="tok-kw">class</span> RagdollManager : MonoBehaviour
+{
+    <span class="tok-kw">public</span> BoxCollider mainCollider;
+    <span class="tok-kw">public</span> GameObject mainRig;
+    <span class="tok-kw">public</span> Animator mainAnimator;
+
+    <span class="tok-kw">private</span> Character character;
     Rigidbody[] limbsRigidbodies;
     Collider[] ragDollColliders;
 
+    <span class="tok-kw">private</span> <span class="tok-kw">void</span> <span class="tok-fn">Awake</span>() { character = <span class="tok-fn">GetComponent</span>&lt;Character&gt;(); }
 
-    private void Awake()
+    <span class="tok-kw">void</span> <span class="tok-fn">Start</span>()
     {
-        character = GetComponent&ltCharacter&gt();
+        <span class="tok-fn">GetRagdollBits</span>();
+        <span class="tok-fn">RagdollModeOff</span>();
+        <span class="tok-fn">GetComponent</span>&lt;Rigidbody&gt;().centerOfMass = Vector3.zero;
+        <span class="tok-fn">GetComponent</span>&lt;Rigidbody&gt;().inertiaTensorRotation = Quaternion.identity;
     }
 
-
-    void Start()
+    <span class="tok-kw">void</span> <span class="tok-fn">GetRagdollBits</span>()
     {
-        GetRagdollBits();
-        RagdollModeOff();
-
-        GetComponent&ltRigidbody&gt().centerOfMass = Vector3.zero;
-        GetComponent&ltRigidbody&gt().inertiaTensorRotation = Quaternion.identity;
+        ragDollColliders = mainRig.<span class="tok-fn">GetComponentsInChildren</span>&lt;Collider&gt;();
+        limbsRigidbodies = mainRig.<span class="tok-fn">GetComponentsInChildren</span>&lt;Rigidbody&gt;();
     }
 
-    void GetRagdollBits()
+    <span class="tok-kw">public</span> <span class="tok-kw">void</span> <span class="tok-fn">RagdollModeOn</span>(DeathCause causeOfDeath, <span class="tok-kw">float</span>? horizontalForceRadius, <span class="tok-kw">float</span>? verticalForceAmount)
     {
-        ragDollColliders = mainRig.GetComponentsInChildren&ltCollider&gt();
-        limbsRigidbodies = mainRig.GetComponentsInChildren&ltRigidbody&gt();
-    }
+        character.CanMove = <span class="tok-kw">false</span>;
+        <span class="tok-kw">if</span> (mainAnimator != <span class="tok-kw">null</span>) mainAnimator.enabled = <span class="tok-kw">false</span>;
 
-    public void RagdollModeOn(DeathCause causeOfDeath, float? horizontalForceRadius, float? verticalForceAmount)
-    {
-        character.CanMove = false;
+        <span class="tok-fn">Destroy</span>(gameObject, <span class="tok-num">3f</span>);
+        <span class="tok-kw">foreach</span> (Collider col <span class="tok-kw">in</span> ragDollColliders) col.enabled = <span class="tok-kw">true</span>;
 
-        if (mainAnimator != null)
-            mainAnimator.enabled = false;
-
-        Destroy(gameObject, 3f);
-        foreach (Collider col in ragDollColliders)
+        <span class="tok-kw">if</span> (causeOfDeath == DeathCause.Regular)
         {
-            col.enabled = true;
+            <span class="tok-kw">foreach</span> (Rigidbody rigid <span class="tok-kw">in</span> limbsRigidbodies) rigid.isKinematic = <span class="tok-kw">false</span>;
         }
-
-        if (causeOfDeath == DeathCause.Regular)
+        <span class="tok-kw">else</span> <span class="tok-kw">if</span> (causeOfDeath == DeathCause.Explosion)
         {
-            foreach (Rigidbody rigid in limbsRigidbodies)
+            <span class="tok-kw">foreach</span> (Rigidbody rigid <span class="tok-kw">in</span> limbsRigidbodies)
             {
-                rigid.isKinematic = false;
-            }
-        }
-
-        else if (causeOfDeath == DeathCause.Explosion)
-        {
-            foreach (Rigidbody rigid in limbsRigidbodies)
-            {
-                rigid.isKinematic = false;
-                rigid.AddForce((Vector3)(transform.right *
-                                         Random.Range((float)-horizontalForceRadius, (float)horizontalForceRadius) +
-                                         transform.up * verticalForceAmount +
-                                         transform.forward * Random.Range((float)-horizontalForceRadius,
-                                             (float)horizontalForceRadius)),
+                rigid.isKinematic = <span class="tok-kw">false</span>;
+                rigid.<span class="tok-fn">AddForce</span>(
+                    transform.right * Random.<span class="tok-fn">Range</span>((<span class="tok-kw">float</span>)-horizontalForceRadius, (<span class="tok-kw">float</span>)horizontalForceRadius) +
+                    transform.up * verticalForceAmount +
+                    transform.forward * Random.<span class="tok-fn">Range</span>((<span class="tok-kw">float</span>)-horizontalForceRadius, (<span class="tok-kw">float</span>)horizontalForceRadius),
                     ForceMode.Impulse);
             }
         }
-        else if (causeOfDeath == DeathCause.Turret)
+        <span class="tok-kw">else</span> <span class="tok-kw">if</span> (causeOfDeath == DeathCause.Turret)
         {
-            foreach (Rigidbody rigid in limbsRigidbodies)
+            <span class="tok-kw">foreach</span> (Rigidbody rigid <span class="tok-kw">in</span> limbsRigidbodies)
             {
-                rigid.isKinematic = false;
-                rigid.AddForce(new Vector3(transform.position.x * (float)horizontalForceRadius, 0f, 0f),
+                rigid.isKinematic = <span class="tok-kw">false</span>;
+                rigid.<span class="tok-fn">AddForce</span>(
+                    <span class="tok-kw">new</span> <span class="tok-fn">Vector3</span>(transform.position.x * (<span class="tok-kw">float</span>)horizontalForceRadius, <span class="tok-num">0f</span>, <span class="tok-num">0f</span>),
                     ForceMode.Impulse);
             }
         }
 
-        mainCollider.enabled = false;
-        GetComponent&ltRigidbody&gt().isKinematic = true;
-    }
-
-    public void RagdollModeOff()
-    {
-        foreach (Collider col in ragDollColliders)
-        {
-            col.enabled = false;
-        }
-
-        foreach (Rigidbody rigid in limbsRigidbodies)
-        {
-            rigid.isKinematic = true;
-        }
-
-        mainAnimator.enabled = true;
-        mainCollider.enabled = true;
-        GetComponent&ltRigidbody&gt().isKinematic = false;
+        mainCollider.enabled = <span class="tok-kw">false</span>;
+        <span class="tok-fn">GetComponent</span>&lt;Rigidbody&gt;().isKinematic = <span class="tok-kw">true</span>;
     }
 }</code></pre>
-        </div>
-    </section>
+    </article>
 
-</div>
+    <footer class="site-footer">
+        <span>© Mert Yılmaz</span>
+    </footer>
 
-<!-- Footer -->
-<footer id="footer" class="wrapper alt">
-    <div class="inner">
-        <ul class="menu">
-            <li>&copy; Untitled. All rights reserved.</li>
-            <li>Design: <a href="http://html5up.net">HTML5 UP</a></li>
-        </ul>
-    </div>
-</footer>
-
-<!-- Scripts -->
-<script src="assets/js/jquery.min.js"></script>
-<script src="assets/js/jquery.scrollex.min.js"></script>
-<script src="assets/js/jquery.scrolly.min.js"></script>
-<script src="assets/js/browser.min.js"></script>
-<script src="assets/js/breakpoints.min.js"></script>
-<script src="assets/js/util.js"></script>
-<script src="assets/js/main.js"></script>
-
+</main>
 </body>
-
 </html>

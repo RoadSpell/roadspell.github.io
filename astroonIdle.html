@@ -1,424 +1,225 @@
 <!DOCTYPE HTML>
-<!--
-	Hyperspace by HTML5 UP
-	html5up.net | @ajlkn
-	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
--->
-<html>
-
+<html lang="en-US">
 <head>
-	<title>MERT YILMAZ - Game Development & Design Portfolio</title>
-	<meta charset="utf-8" />
-	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
-	<link rel="stylesheet" href="assets/css/main.css" />
-	<noscript>
-		<link rel="stylesheet" href="assets/css/noscript.css" />
-	</noscript>
+    <title>Astroon Idle — Mert Yılmaz</title>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <link rel="stylesheet" href="assets/css/main.css"/>
 </head>
+<body>
+<main class="container">
 
-<body class="is-preload">
+    <header class="site-header">
+        <a href="index.html" class="site-title">MERT YILMAZ</a>
+        <nav class="site-nav">
+            <a href="index.html">Home</a>
+        </nav>
+    </header>
 
-<!-- Header -->
-<header id="header">
-	<a href="index.html" class="title">MERT YILMAZ</a>
-	<nav>
-		<ul>
-			<li><a href="index.html">Home</a></li>
-			<li><a href="generic.html" class="active">Generic</a></li>
-			<li><a href="elements.html">Elements</a></li>
-		</ul>
-	</nav>
-</header>
+    <a href="index.html#projects" class="back-link">← All projects</a>
 
-<!-- Wrapper -->
-<div id="wrapper">
+    <article>
+        <h1>Astroon Idle</h1>
+        <p class="project-meta"><em>Role:</em> Game Developer · <em>Engine:</em> Unity · <em>Platform:</em> Mobile (Web3)</p>
 
-	<!-- Main -->
-	<section id="main" class="wrapper">
-		<div class="inner">
-			<h1 class="major">Astroon Idle</h1>
-			<span class="image fit"><img src="images/AstroonConcept.jpg" alt="" /></span>
-			<p>Astroon Idle, an idle manager mobile game, offers players a dynamic experience with:
+        <img src="images/AstroonConcept.jpg" alt="Astroon Idle" class="article-image"/>
 
-			<ul>
-				<li>Unlocking and upgrading buildings for specific purposes</li>
-				<li>Merging hexagon mines to gather basic resources</li>
-				<li>Refining resources to create ship parts</li>
-				<li>Strategically upgrading individual Astroons for optimal performance</li>
-				<li>Managing the crucial solar energy resource through merging solar panels</li>
-			</ul>
-			Astroon Idle intricately weaves resource management, merging mechanics, and strategic upgrades,
-			delivering an engaging and rewarding idle gaming experience.</p>
+        <p>Astroon Idle is an idle manager mobile game offering players a dynamic experience:</p>
+        <ul>
+            <li>Unlocking and upgrading buildings for specific purposes</li>
+            <li>Merging hexagon mines to gather basic resources</li>
+            <li>Refining resources to create ship parts</li>
+            <li>Strategically upgrading individual Astroons for optimal performance</li>
+            <li>Managing the crucial solar energy resource through merging solar panels</li>
+        </ul>
+        <p>Astroon Idle intricately weaves resource management, merging mechanics, and strategic upgrades, delivering an engaging and rewarding idle gaming experience.</p>
 
+        <h2>Code Snippets</h2>
 
-			<h2>Code Snippets</h2>
-			<h3>Game Resources</h3>
-			<pre><code>[Serializable]
-    public class GameResources
-    {
-        [SerializeField]
-        internal Dictionary&ltResourceType, Resource&gt Resources = new Dictionary&ltResourceType, Resource&gt();
-
-        public GameResources()
-        {
-            Resources = new Dictionary&ltResourceType, Resource&gt();
-        }
-
-        public GameResources(Dictionary&ltResourceType, Resource&gt resources)
-        {
-            Resources = resources;
-        }
-
-        public bool HasAtLeast(GameResources requirements)
-        {
-            if (requirements == null)
-                return true;
-
-            foreach (var requirement in requirements.Resources)
-            {
-                if (!(Resources.ContainsKey(requirement.Key) && requirement.Value.Quantity &gt AlphabeticNotation.zero) ||
-                    Resources[requirement.Key] < requirement.Value)
-                    return false;
-            }
-
-
-            return true;
-        }
-
-        public void AddOrCreateResource(ResourceType resourceType, Resource resourceToAdd)
-        {
-            if (Resources.ContainsKey(resourceType))
-            {
-                Resources[resourceType] += resourceToAdd;
-            }
-            else
-            {
-                Resources.Add(resourceType, resourceToAdd);
-            }
-        }
-
-        public static GameResources operator +(GameResources a, GameResources b)
-        {
-            var result = new GameResources(); //a;
-            if (a != null)
-            {
-                foreach (var kvp in a.Resources)
-                {
-                    result.AddOrCreateResource(kvp.Key, kvp.Value);
-                }
-            }
-
-            if (b != null)
-            {
-                foreach (var kvp in b.Resources)
-                {
-                    result.AddOrCreateResource(kvp.Key, kvp.Value);
-                }
-            }
-
-            return result;
-        }
-
-        public static GameResources operator -(GameResources a, GameResources b)
-        {
-            var result = new GameResources(); //a;
-            if (a != null)
-            {
-                foreach (var kvp in a.Resources)
-                {
-                    result.AddOrCreateResource(kvp.Key, kvp.Value);
-                }
-            }
-
-            if (b != null)
-            {
-                foreach (var kvp in b.Resources)
-                {
-                    if (result.Resources.TryGetValue(kvp.Key, out _))
-                    {
-                        result.Resources[kvp.Key] -= kvp.Value;
-                    }
-                    else
-                    {
-                        Debug.LogError(kvp.Key + " not found!");
-                    }
-                }
-            }
-
-            return result;
-        }
-    }</code></pre>
-			<h3>Mine Merger</h3>
-			<pre><code>public class MineMergerRemake : MergerRemake
+        <h3>Game Resources</h3>
+        <pre><code>[<span class="tok-attr">Serializable</span>]
+<span class="tok-kw">public</span> <span class="tok-kw">class</span> GameResources
 {
-    [SerializeField] private MineDataSORemake mineDataSo;
-    [SerializeField] private ResourceType mineralType;
-    [SerializeField] private SpriteRenderer bgSpriteRenderer;
-    [SerializeField] private SpriteRenderer mineSpriteRenderer;
-    [SerializeField] private MineRemake ownMine;
-    [SerializeField] private HexagonRemake ownHex;
-    private RaycastHit2D[] _hit = new RaycastHit2D[2];
+    [<span class="tok-attr">SerializeField</span>]
+    <span class="tok-kw">internal</span> Dictionary&lt;ResourceType, Resource&gt; Resources = <span class="tok-kw">new</span> <span class="tok-fn">Dictionary</span>&lt;ResourceType, Resource&gt;();
 
-    private void Start()
+    <span class="tok-kw">public</span> <span class="tok-fn">GameResources</span>()
+    {
+        Resources = <span class="tok-kw">new</span> <span class="tok-fn">Dictionary</span>&lt;ResourceType, Resource&gt;();
+    }
+
+    <span class="tok-kw">public</span> <span class="tok-fn">GameResources</span>(Dictionary&lt;ResourceType, Resource&gt; resources)
+    {
+        Resources = resources;
+    }
+
+    <span class="tok-kw">public</span> <span class="tok-kw">bool</span> <span class="tok-fn">HasAtLeast</span>(GameResources requirements)
+    {
+        <span class="tok-kw">if</span> (requirements == <span class="tok-kw">null</span>)
+            <span class="tok-kw">return</span> <span class="tok-kw">true</span>;
+
+        <span class="tok-kw">foreach</span> (<span class="tok-kw">var</span> requirement <span class="tok-kw">in</span> requirements.Resources)
+        {
+            <span class="tok-kw">if</span> (!(Resources.<span class="tok-fn">ContainsKey</span>(requirement.Key) &amp;&amp; requirement.Value.Quantity &gt; AlphabeticNotation.zero) ||
+                Resources[requirement.Key] &lt; requirement.Value)
+                <span class="tok-kw">return</span> <span class="tok-kw">false</span>;
+        }
+
+        <span class="tok-kw">return</span> <span class="tok-kw">true</span>;
+    }
+
+    <span class="tok-kw">public</span> <span class="tok-kw">void</span> <span class="tok-fn">AddOrCreateResource</span>(ResourceType resourceType, Resource resourceToAdd)
+    {
+        <span class="tok-kw">if</span> (Resources.<span class="tok-fn">ContainsKey</span>(resourceType))
+            Resources[resourceType] += resourceToAdd;
+        <span class="tok-kw">else</span>
+            Resources.<span class="tok-fn">Add</span>(resourceType, resourceToAdd);
+    }
+
+    <span class="tok-kw">public</span> <span class="tok-kw">static</span> GameResources <span class="tok-kw">operator</span> +(GameResources a, GameResources b)
+    {
+        <span class="tok-kw">var</span> result = <span class="tok-kw">new</span> <span class="tok-fn">GameResources</span>();
+        <span class="tok-kw">if</span> (a != <span class="tok-kw">null</span>)
+            <span class="tok-kw">foreach</span> (<span class="tok-kw">var</span> kvp <span class="tok-kw">in</span> a.Resources)
+                result.<span class="tok-fn">AddOrCreateResource</span>(kvp.Key, kvp.Value);
+
+        <span class="tok-kw">if</span> (b != <span class="tok-kw">null</span>)
+            <span class="tok-kw">foreach</span> (<span class="tok-kw">var</span> kvp <span class="tok-kw">in</span> b.Resources)
+                result.<span class="tok-fn">AddOrCreateResource</span>(kvp.Key, kvp.Value);
+
+        <span class="tok-kw">return</span> result;
+    }
+
+    <span class="tok-kw">public</span> <span class="tok-kw">static</span> GameResources <span class="tok-kw">operator</span> -(GameResources a, GameResources b)
+    {
+        <span class="tok-kw">var</span> result = <span class="tok-kw">new</span> <span class="tok-fn">GameResources</span>();
+        <span class="tok-kw">if</span> (a != <span class="tok-kw">null</span>)
+            <span class="tok-kw">foreach</span> (<span class="tok-kw">var</span> kvp <span class="tok-kw">in</span> a.Resources)
+                result.<span class="tok-fn">AddOrCreateResource</span>(kvp.Key, kvp.Value);
+
+        <span class="tok-kw">if</span> (b != <span class="tok-kw">null</span>)
+            <span class="tok-kw">foreach</span> (<span class="tok-kw">var</span> kvp <span class="tok-kw">in</span> b.Resources)
+            {
+                <span class="tok-kw">if</span> (result.Resources.<span class="tok-fn">TryGetValue</span>(kvp.Key, <span class="tok-kw">out</span> _))
+                    result.Resources[kvp.Key] -= kvp.Value;
+                <span class="tok-kw">else</span>
+                    Debug.<span class="tok-fn">LogError</span>(kvp.Key + <span class="tok-str">" not found!"</span>);
+            }
+
+        <span class="tok-kw">return</span> result;
+    }
+}</code></pre>
+
+        <h3>Mine Merger</h3>
+        <pre><code><span class="tok-kw">public</span> <span class="tok-kw">class</span> MineMergerRemake : MergerRemake
+{
+    [<span class="tok-attr">SerializeField</span>] <span class="tok-kw">private</span> MineDataSORemake mineDataSo;
+    [<span class="tok-attr">SerializeField</span>] <span class="tok-kw">private</span> ResourceType mineralType;
+    [<span class="tok-attr">SerializeField</span>] <span class="tok-kw">private</span> SpriteRenderer bgSpriteRenderer;
+    [<span class="tok-attr">SerializeField</span>] <span class="tok-kw">private</span> SpriteRenderer mineSpriteRenderer;
+    [<span class="tok-attr">SerializeField</span>] <span class="tok-kw">private</span> MineRemake ownMine;
+    [<span class="tok-attr">SerializeField</span>] <span class="tok-kw">private</span> HexagonRemake ownHex;
+    <span class="tok-kw">private</span> RaycastHit2D[] _hit = <span class="tok-kw">new</span> RaycastHit2D[<span class="tok-num">2</span>];
+
+    <span class="tok-kw">private</span> <span class="tok-kw">void</span> <span class="tok-fn">Start</span>()
     {
         OnMinePressedDown += TurnGreenIfMergeable;
         OnMinePressedUp += TurnToPreviousColorFromGreen;
     }
 
-    private void OnDisable()
+    <span class="tok-kw">private</span> <span class="tok-kw">void</span> <span class="tok-fn">OnDisable</span>()
     {
         OnMinePressedDown -= TurnGreenIfMergeable;
         OnMinePressedUp -= TurnToPreviousColorFromGreen;
     }
 
-    protected override void OnMouseDown()
+    <span class="tok-kw">protected</span> <span class="tok-kw">override</span> <span class="tok-kw">void</span> <span class="tok-fn">OnMouseDown</span>()
     {
-        Debug.Log($"This mine's initial position: {InitialPos}, Level: {MergeLevel}");
+        <span class="tok-kw">if</span> (MergeLevel == <span class="tok-num">0</span>)
+            <span class="tok-kw">return</span>;
 
-        if (MergeLevel == 0)
-            return;
-
-
-        base.OnMouseDown();
-        OnMinePressedDown?.Invoke(this, new MineEventArgs
+        <span class="tok-kw">base</span>.<span class="tok-fn">OnMouseDown</span>();
+        OnMinePressedDown?.<span class="tok-fn">Invoke</span>(<span class="tok-kw">this</span>, <span class="tok-kw">new</span> MineEventArgs
         {
             Level = MergeLevel,
             MineralType = mineralType
         });
-        SetSelectedOrderInLayer();
+        <span class="tok-fn">SetSelectedOrderInLayer</span>();
     }
 
-    protected override void OnMouseUp()
+    <span class="tok-kw">protected</span> <span class="tok-kw">override</span> <span class="tok-kw">void</span> <span class="tok-fn">OnMouseUp</span>()
     {
-        PanZoom.Instance.mapIsMovable = true;
+        PanZoom.Instance.mapIsMovable = <span class="tok-kw">true</span>;
 
-        if (MergeLevel == 0)
-            return;
+        <span class="tok-kw">if</span> (MergeLevel == <span class="tok-num">0</span>)
+            <span class="tok-kw">return</span>;
 
-        int hitCount = Physics2D.RaycastNonAlloc(transform.position, Vector2.zero, _hit);
+        <span class="tok-kw">int</span> hitCount = Physics2D.<span class="tok-fn">RaycastNonAlloc</span>(transform.position, Vector2.zero, _hit);
 
-        if (hitCount is 0 or 1)
+        <span class="tok-kw">if</span> (hitCount <span class="tok-kw">is</span> <span class="tok-num">0</span> <span class="tok-kw">or</span> <span class="tok-num">1</span>)
         {
             transform.position = InitialPos;
-            OnMinePressedUp?.Invoke(this, EventArgs.Empty);
-            return;
+            OnMinePressedUp?.<span class="tok-fn">Invoke</span>(<span class="tok-kw">this</span>, EventArgs.Empty);
+            <span class="tok-kw">return</span>;
         }
 
-        RaycastHit2D targetHit = default;
+        RaycastHit2D targetHit = <span class="tok-kw">default</span>;
 
-        foreach (var hit in _hit)
+        <span class="tok-kw">foreach</span> (<span class="tok-kw">var</span> hit <span class="tok-kw">in</span> _hit)
         {
-            Debug.Log($"Hit: {hit.transform.gameObject.name}");
-            if (!hit.transform.TryGetComponent(out MineMergerRemake selfMerger))
-                continue;
-            if (selfMerger == this)
-                continue;
+            <span class="tok-kw">if</span> (!hit.transform.<span class="tok-fn">TryGetComponent</span>(<span class="tok-kw">out</span> MineMergerRemake selfMerger))
+                <span class="tok-kw">continue</span>;
+            <span class="tok-kw">if</span> (selfMerger == <span class="tok-kw">this</span>)
+                <span class="tok-kw">continue</span>;
             targetHit = hit;
-            break;
+            <span class="tok-kw">break</span>;
         }
 
-        if (targetHit.collider != null)
+        <span class="tok-kw">if</span> (targetHit.collider != <span class="tok-kw">null</span>
+            &amp;&amp; targetHit.transform.<span class="tok-fn">TryGetComponent</span>(<span class="tok-kw">out</span> MineMergerRemake otherMineMerger)
+            &amp;&amp; otherMineMerger != <span class="tok-kw">this</span>)
         {
-            Debug.Log($"Raycast hit {targetHit.transform.name}");
-            if (targetHit.transform.TryGetComponent(out MineMergerRemake otherMineMerger))
+            <span class="tok-kw">if</span> (otherMineMerger.MergeLevel == <span class="tok-num">0</span>)
             {
-                if (otherMineMerger != this)
-                {
-                    if (otherMineMerger.MergeLevel == 0)
-                    {
-                        if (otherMineMerger.ownMine.IsDeactivated())
-                        {
-                            SwitchPlaces(otherMineMerger.transform);
-                        }
+                <span class="tok-kw">if</span> (otherMineMerger.ownMine.<span class="tok-fn">IsDeactivated</span>())
+                    <span class="tok-fn">SwitchPlaces</span>(otherMineMerger.transform);
 
-                        OnMinePressedUp?.Invoke(this, EventArgs.Empty);
-                        return;
-                    }
-
-                    if (otherMineMerger.mineralType == mineralType)
-                    {
-                        if (otherMineMerger.MergeLevel == MergeLevel)
-                        {
-                            Merge(otherMineMerger);
-                            OnMinePressedUp?.Invoke(this, EventArgs.Empty);
-                            Debug.Log($"Merged {targetHit.transform.name}!");
-                            return;
-                        }
-
-                        Debug.LogError("Merge levels are not the same");
-                    }
-                    else
-                    {
-                        Debug.LogError("Mineral types are different");
-                    }
-                }
-                else
-                {
-                    Debug.LogError($"Trying to merge with itself");
-                }
+                OnMinePressedUp?.<span class="tok-fn">Invoke</span>(<span class="tok-kw">this</span>, EventArgs.Empty);
+                <span class="tok-kw">return</span>;
             }
-            else
+
+            <span class="tok-kw">if</span> (otherMineMerger.mineralType == mineralType
+                &amp;&amp; otherMineMerger.MergeLevel == MergeLevel)
             {
-                Debug.LogError($"{targetHit.transform.name} does not have a merger");
+                <span class="tok-fn">Merge</span>(otherMineMerger);
+                OnMinePressedUp?.<span class="tok-fn">Invoke</span>(<span class="tok-kw">this</span>, EventArgs.Empty);
+                <span class="tok-kw">return</span>;
             }
-        }
-        else
-        {
-            Debug.LogError("Ray did not hit a mergeable thing!");
         }
 
         transform.position = InitialPos;
-        OnMinePressedUp?.Invoke(this, EventArgs.Empty);
+        OnMinePressedUp?.<span class="tok-fn">Invoke</span>(<span class="tok-kw">this</span>, EventArgs.Empty);
     }
 
-    public new event EventHandler&ltMineEventArgs&gt OnMerge;
-    public event EventHandler&ltMineEventArgs&gt OnBought;
-
-    public static event EventHandler&ltMineEventArgs&gt OnMergeStatic;
-    public static event EventHandler OnBoughtStatic;
-
-    public static event EventHandler&ltMineEventArgs&gt OnMinePressedDown;
-    public static event EventHandler OnMinePressedUp;
-    public static event EventHandler OnPlaceSwitched;
-
-    private void TurnGreenIfMergeable(object sender, MineEventArgs e)
+    <span class="tok-kw">protected</span> <span class="tok-kw">override</span> <span class="tok-kw">void</span> <span class="tok-fn">Merge</span>(MergerRemake otherMerger)
     {
-        if (e.Level == MergeLevel && e.MineralType == mineralType)
-            bgSpriteRenderer.color = Color.green;
-    }
+        <span class="tok-kw">base</span>.<span class="tok-fn">Merge</span>(otherMerger);
+        MineMergerRemake otherMineMerger = otherMerger <span class="tok-kw">as</span> MineMergerRemake;
 
-    private void TurnToPreviousColorFromGreen(object sender, EventArgs e)
-    {
-        if (ownHex.BoostLocation != BoostLocationRemake.None)
-        {
-            bgSpriteRenderer.color = Color.yellow;
-            return;
-        }
+        otherMineMerger.<span class="tok-fn">SetVisuals</span>();
+        <span class="tok-fn">RemoveVisuals</span>();
 
-        if (bgSpriteRenderer.color != Color.green)
-            return;
-        bgSpriteRenderer.color = Color.white;
-    }
-
-    private void AdjustToBeingBought()
-    {
-        SetNormalOrderInLayer();
-        bgSpriteRenderer.sprite = mineDataSo.GetBackgroundSprite(mineralType);
-        mineSpriteRenderer.sprite = mineDataSo.GetMineSprite(MergeLevel, mineralType);
-    }
-
-    protected override void Merge(MergerRemake otherMerger)
-    {
-        base.Merge(otherMerger);
-
-        MineMergerRemake otherMineMerger = otherMerger as MineMergerRemake;
-
-        otherMineMerger.SetVisuals();
-        RemoveVisuals();
-
-        MineManager.Instance.AddNewMine(otherMineMerger.ownMine);
-        MineManager.Instance.RemoveMine(ownMine);
-        MineManager.Instance.CalculateMineCountsAndGeneration();
-
-        OnMerge?.Invoke(this, new MineEventArgs { Level = MergeLevel, MineralType = mineralType });
-        otherMineMerger.OnMerge?.Invoke(otherMineMerger,
-            new MineEventArgs
-            {
-                Level = otherMineMerger.MergeLevel, MineralType = otherMineMerger.mineralType,
-                mineSprite = otherMineMerger.bgSpriteRenderer.sprite
-            });
-        OnMergeStatic?.Invoke(this,
-            new MineEventArgs
-            {
-                Level = otherMineMerger.MergeLevel, MineralType = otherMineMerger.mineralType,
-                mineSprite = otherMineMerger.mineSpriteRenderer.sprite
-            });
-    }
-
-    private void SwitchPlaces(Transform otherHex)
-    {
-        if (!otherHex.TryGetComponent(out HexagonRemake hex) || !hex.GetVisibleStatus())
-        {
-            transform.position = InitialPos;
-            return;
-        }
-
-
-        transform.position = otherHex.position;
-        otherHex.position = InitialPos;
-
-        OnPlaceSwitched?.Invoke(this, EventArgs.Empty);
-    }
-
-    private void SetVisuals()
-    {
-        SetNormalOrderInLayer();
-        bgSpriteRenderer.sprite = mineDataSo.GetBackgroundSprite(mineralType);
-        mineSpriteRenderer.sprite = mineDataSo.GetMineSprite(MergeLevel, mineralType);
-    }
-
-    private void RemoveVisuals()
-    {
-        bgSpriteRenderer.sortingOrder = MineSortingLayersSO.EMPTY_ORDER_IN_LAYER;
-        bgSpriteRenderer.sprite = mineDataSo.emptyBg;
-        mineSpriteRenderer.sprite = null;
-    }
-
-    public ResourceType GetMineralType()
-    {
-        return mineralType;
-    }
-
-    public void SetMineralType(ResourceType targetMineralType)
-    {
-        mineralType = targetMineralType;
-    }
-
-    public void GetBought()
-    {
-        MergeLevel += 1;
-        AdjustToBeingBought();
-        MineManager.Instance.AddNewMine(ownMine);
-        MineManager.Instance.CalculateMineCountsAndGeneration();
-        OnBought?.Invoke(this, new MineEventArgs { Level = MergeLevel, MineralType = mineralType });
-    }
-
-    private void SetNormalOrderInLayer()
-    {
-        bgSpriteRenderer.sortingOrder = MineSortingLayersSO.MINE_BG_ORDER_IN_LAYER;
-        mineSpriteRenderer.sortingOrder = MineSortingLayersSO.MINE_UNIT_ORDER_IN_LAYER;
-    }
-
-    private void SetSelectedOrderInLayer()
-    {
-        bgSpriteRenderer.sortingOrder = MineSortingLayersSO.SELECTED_MINE_BG_ORDER_IN_LAYER;
-        mineSpriteRenderer.sortingOrder = MineSortingLayersSO.SELECTED_MINE_UNIT_ORDER_IN_LAYER;
+        MineManager.Instance.<span class="tok-fn">AddNewMine</span>(otherMineMerger.ownMine);
+        MineManager.Instance.<span class="tok-fn">RemoveMine</span>(ownMine);
+        MineManager.Instance.<span class="tok-fn">CalculateMineCountsAndGeneration</span>();
     }
 }</code></pre>
-		</div>
-	</section>
+    </article>
 
-</div>
+    <footer class="site-footer">
+        <span>© Mert Yılmaz</span>
+    </footer>
 
-<!-- Footer -->
-<footer id="footer" class="wrapper alt">
-	<div class="inner">
-		<ul class="menu">
-			<li>&copy; Untitled. All rights reserved.</li>
-			<li>Design: <a href="http://html5up.net">HTML5 UP</a></li>
-		</ul>
-	</div>
-</footer>
-
-<!-- Scripts -->
-<script src="assets/js/jquery.min.js"></script>
-<script src="assets/js/jquery.scrollex.min.js"></script>
-<script src="assets/js/jquery.scrolly.min.js"></script>
-<script src="assets/js/browser.min.js"></script>
-<script src="assets/js/breakpoints.min.js"></script>
-<script src="assets/js/util.js"></script>
-<script src="assets/js/main.js"></script>
-
+</main>
 </body>
-
 </html>
